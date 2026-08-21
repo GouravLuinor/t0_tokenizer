@@ -8,7 +8,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![Privacy](https://img.shields.io/badge/Privacy-100%25%20Local%20Compute-10b981?style=flat-square)](https://github.com/GouravLuinor/t0_tokenizer)
-[![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE)
 
 ---
 
@@ -196,12 +195,6 @@ To run using the automated zero-downtime deployment script:
 | <kbd>⌘ K</kbd> / <kbd>Ctrl + K</kbd> | Open Command Palette |
 | <kbd>Esc</kbd> | Close Modals / Deselect Token |
 | <kbd>⌘ Enter</kbd> | Trigger Prompt Minification |
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ---
 

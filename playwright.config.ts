@@ -17,11 +17,19 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    // Firefox/WebKit: run `npx playwright install firefox webkit` locally;
+    // enabled in CI where browser deps are provisioned
+    ...(process.env.PLAYWRIGHT_ALL_BROWSERS
+      ? [
+          { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+          { name: "webkit", use: { ...devices["Desktop Safari"] } },
+        ]
+      : []),
   ],
   webServer: {
-    command: "npm run dev",
+    command: "npm run build && npm run start",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 240 * 1000,
   },
 });

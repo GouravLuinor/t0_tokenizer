@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {
   darkMode: ["class"],
@@ -9,6 +10,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      transitionTimingFunction: {
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+      },
+      transitionDuration: {
+        "150": "150ms",
+        "180": "180ms",
+        "300": "300ms",
+      },
       colors: {
         background: "#09090B",
         surface: {
@@ -78,7 +87,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [tailwindcssAnimate],
 };
 
 export default config;

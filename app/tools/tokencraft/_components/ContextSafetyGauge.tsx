@@ -2,25 +2,16 @@
 
 import React from "react";
 import { useTokenCraftStore } from "../_store/useTokenCraftStore";
+import { getCurrentModel, encodingDisclosure } from "../_lib/modelRegistry";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { Gauge, AlertTriangle, ShieldCheck, AlertCircle } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 
-export function ContextSafetyGauge() {
-  const { tokenCount, selectedModel, modelsRegistry } = useTokenCraftStore();
-  const currentModel =
-    modelsRegistry[selectedModel] ||
-    Object.values(modelsRegistry)[0] || {
-      id: "claude-sonnet-5",
-      name: "Claude Sonnet 5",
-      provider: "Anthropic",
-      family: "Claude BPE",
-      contextWindow: 1000000,
-      inputCostPer1M: 2.0,
-      cachedInputCostPer1M: 0.2,
-      outputCostPer1M: 10.0,
-      badgeText: "1.0M",
-    };
+export const ContextSafetyGauge = React.memo(function ContextSafetyGauge() {
+  const tokenCount = useTokenCraftStore((s) => s.tokenCount);
+  const selectedModel = useTokenCraftStore((s) => s.selectedModel);
+  const modelsRegistry = useTokenCraftStore((s) => s.modelsRegistry);
+  const currentModel = getCurrentModel(modelsRegistry, selectedModel);
   const maxTokens = currentModel.contextWindow;
 
   const usagePercent = Math.min(100, (tokenCount / maxTokens) * 100);
@@ -54,7 +45,7 @@ export function ContextSafetyGauge() {
     <div
       role="region"
       aria-label="Context Window Safety Gauge"
-      className="flex flex-col p-5 rounded-xl border border-surface-border bg-surface-default shadow-sm transition-all duration-200 hover:border-surface-borderHover"
+      className="flex flex-col p-5 rounded-xl border border-surface-border bg-surface-default shadow-sm transition-all duration-200 hover:border-surface-borderHover lg:h-full lg:min-h-0 overflow-hidden"
     >
       {/* Accessible native meter fallback for assistive tech */}
       <meter
@@ -139,6 +130,14 @@ export function ContextSafetyGauge() {
         <span className="text-zinc-300 font-medium truncate max-w-[220px]" title={currentModel.name}>
           {currentModel.name}
         </span>
+        {encodingDisclosure(currentModel.family) && (
+          <span
+            className="text-[9px] px-1 py-0.5 rounded bg-amber-500/10 border border-amber-500/25 text-amber-400 shrink-0"
+            title="Counts use an o200k approximation of this model's native tokenizer"
+          >
+            {encodingDisclosure(currentModel.family)}
+          </span>
+        )}
       </div>
 
       {/* Metrics Breakdown Grid */}
@@ -181,5 +180,5 @@ export function ContextSafetyGauge() {
       </div>
     </div>
   );
-}
+});
 

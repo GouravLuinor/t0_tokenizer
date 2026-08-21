@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   useTokenCraftStore,
-  PROMPT_PRESETS,
   type VisualViewMode,
 } from "../_store/useTokenCraftStore";
+import { PROMPT_PRESETS } from "../_lib/presets";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Keycap } from "@/components/ui/keycap";
 import { ShinyText } from "@/components/ui/shiny-text";
+import { copyText } from "@/lib/clipboard";
 import {
   Cpu,
   Bookmark,
@@ -36,34 +37,39 @@ interface CommandItem {
 }
 
 export function CommandPalette() {
-  const {
-    commandPaletteOpen,
-    setCommandPaletteOpen,
-    setSelectedModel,
-    modelsRegistry,
-    loadPreset,
-    generateMinifyPreview,
-    revertMinification,
-    previousText,
-    clearText,
-    setViewMode,
-    tokenChunks,
-  } = useTokenCraftStore();
+  const commandPaletteOpen = useTokenCraftStore(
+    (s) => s.commandPaletteOpen
+  );
+  const setCommandPaletteOpen = useTokenCraftStore(
+    (s) => s.setCommandPaletteOpen
+  );
+  const setSelectedModel = useTokenCraftStore((s) => s.setSelectedModel);
+  const modelsRegistry = useTokenCraftStore((s) => s.modelsRegistry);
+  const loadPreset = useTokenCraftStore((s) => s.loadPreset);
+  const generateMinifyPreview = useTokenCraftStore(
+    (s) => s.generateMinifyPreview
+  );
+  const revertMinification = useTokenCraftStore(
+    (s) => s.revertMinification
+  );
+  const hasPreviousText = useTokenCraftStore((s) => s.previousText !== null);
+  const clearText = useTokenCraftStore((s) => s.clearText);
+  const setViewMode = useTokenCraftStore((s) => s.setViewMode);
+  const tokenCount = useTokenCraftStore((s) => s.tokenCount);
 
   const [search, setSearch] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Global keydown listener for Cmd+K / Ctrl+K
+  // Fresh query surface on every open — a stale filter from the previous
+  // session made Enter silently no-op when relaunching the palette
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setCommandPaletteOpen(!commandPaletteOpen);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [commandPaletteOpen, setCommandPaletteOpen]);
+    if (commandPaletteOpen) {
+      setSearch("");
+      setSelectedIndex(0);
+    }
+  }, [commandPaletteOpen]);
+
+  // NOTE: Global Cmd+K handling lives in useGlobalShortcuts (mounted once on the page).
 
   const commands: CommandItem[] = useMemo(() => {
     const list: CommandItem[] = [];
@@ -150,7 +156,7 @@ export function CommandPalette() {
       },
     });
 
-    if (previousText) {
+    if (hasPreviousText) {
       list.push({
         id: "action-revert",
         category: "Actions",
@@ -169,12 +175,11 @@ export function CommandPalette() {
       id: "action-copy-tokens",
       category: "Actions",
       title: "Copy Token IDs Array",
-      subtitle: `Export ${tokenChunks.length} token IDs as JSON array`,
+      subtitle: `Export ${tokenCount} token IDs as JSON array`,
       icon: Copy,
-      shortcut: ["⌘", "C"],
       action: async () => {
-        const ids = tokenChunks.map((t) => t.id);
-        await navigator.clipboard.writeText(JSON.stringify(ids));
+        const ids = useTokenCraftStore.getState().tokenChunks.map((t) => t.id);
+        await copyText(JSON.stringify(ids));
         setCommandPaletteOpen(false);
       },
     });
@@ -185,6 +190,7 @@ export function CommandPalette() {
       title: "Clear Editor",
       subtitle: "Erase raw text and reset token counters",
       icon: Trash2,
+      shortcut: ["⌘", "⌫"],
       action: () => {
         clearText();
         setCommandPaletteOpen(false);
@@ -199,9 +205,9 @@ export function CommandPalette() {
     setViewMode,
     generateMinifyPreview,
     revertMinification,
-    previousText,
+    hasPreviousText,
     clearText,
-    tokenChunks,
+    tokenCount,
     setCommandPaletteOpen,
   ]);
 
@@ -238,7 +244,10 @@ export function CommandPalette() {
 
   return (
     <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden border-surface-border bg-surface-default shadow-elevated rounded-2xl glass-edge">
+      <DialogContent
+        exitAnimation={false}
+        className="max-w-2xl p-0 overflow-hidden border-surface-border bg-surface-default shadow-elevated rounded-2xl glass-edge"
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>Command Palette</DialogTitle>
         </DialogHeader>
@@ -258,6 +267,7 @@ export function CommandPalette() {
             autoFocus
             aria-label="Command palette search"
             className="flex-1 bg-transparent text-sm font-mono text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+            style={{ caretColor: "#38BDF8" }}
           />
           <Keycap size="xs">ESC</Keycap>
         </div>
@@ -265,7 +275,7 @@ export function CommandPalette() {
         {/* Commands List (Raycast 6px rows, border-brighten) */}
         <div className="max-h-80 overflow-y-auto p-2 space-y-1" role="listbox">
           {filteredCommands.length === 0 ? (
-            <div className="p-6 text-center text-xs font-mono text-zinc-500">
+            <div className="p-6 text-center text-xs font-mono text-zinc-400">
               No matching commands found.
             </div>
           ) : (
@@ -305,7 +315,7 @@ export function CommandPalette() {
                         {cmd.title}
                       </span>
                       {cmd.subtitle && (
-                        <span className="text-[10px] font-mono text-zinc-500">
+                        <span className="text-[10px] font-mono text-zinc-400">
                           {cmd.subtitle}
                         </span>
                       )}
@@ -322,7 +332,7 @@ export function CommandPalette() {
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider bg-surface-subtle px-1.5 py-0.5 rounded border border-surface-border">
+                      <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-wider bg-surface-subtle px-1.5 py-0.5 rounded border border-surface-border">
                         {cmd.category}
                       </span>
                     )}

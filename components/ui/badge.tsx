@@ -15,8 +15,7 @@ function Badge({
       "bg-surface-elevated text-zinc-300 border-surface-border",
     emerald:
       "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    cyan:
-      "bg-surface-elevated text-zinc-200 border-surface-border",
+    cyan: "bg-sky-500/10 text-sky-400 border-sky-500/20",
     violet:
       "bg-violet-500/10 text-violet-300 border-violet-500/20",
     amber:

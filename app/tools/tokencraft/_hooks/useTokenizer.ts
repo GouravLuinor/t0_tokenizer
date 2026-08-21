@@ -3,80 +3,116 @@
 import { useEffect, useRef } from "react";
 import { useTokenCraftStore } from "../_store/useTokenCraftStore";
 import type {
-  WorkerMessagePayload,
-  WorkerResponsePayload,
-} from "../_workers/tokenizer.worker";
+  TokenizeRequest,
+  TokenizeResponse,
+  TokenizeStats,
+} from "../_lib/tokenize";
+import { mapStatsToStorePatch } from "../_lib/tokenize";
 
+/**
+ * Owns the tokenization pipeline: debounced dispatch to the Web Worker,
+ * stale-response rejection via monotonic request ids, and a transparent
+ * main-thread fallback when Worker construction or runtime fails.
+ */
 export function useTokenizer() {
-  const { rawText, selectedModel, setTokenData } = useTokenCraftStore();
-  const workerRef = useRef<Worker | null>(null);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const rawText = useTokenCraftStore((s) => s.rawText);
+  const selectedModel = useTokenCraftStore((s) => s.selectedModel);
+  const setTokenData = useTokenCraftStore((s) => s.setTokenData);
 
+  const workerRef = useRef<Worker | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestRequestIdRef = useRef(0);
+
+  // Create the worker once; on any failure, fall back to inline computation.
   useEffect(() => {
-    // Initialize Web Worker
     try {
-      workerRef.current = new Worker(
+      const worker = new Worker(
         new URL("../_workers/tokenizer.worker.ts", import.meta.url)
       );
 
-      workerRef.current.onmessage = (
-        e: MessageEvent<WorkerResponsePayload>
-      ) => {
-        const {
-          tokens,
-          count,
-          characterCount,
-          wordCount,
-          byteCount,
-          executionTimeMs,
-        } = e.data;
-
-        setTokenData({
-          tokenChunks: tokens,
-          tokenCount: count,
-          characterCount,
-          wordCount,
-          byteCount,
-          executionTimeMs,
-          isProcessing: false,
-        });
+      worker.onmessage = (e: MessageEvent<TokenizeResponse>) => {
+        // Drop stale responses from superseded requests
+        if (e.data.id !== latestRequestIdRef.current) return;
+        applyStats(e.data);
       };
-    } catch (err) {
-      console.warn("Web Worker initialization failed, falling back to direct computation:", err);
+
+      worker.onerror = () => {
+        // Worker died at runtime — recompute the current text inline
+        worker.terminate();
+        workerRef.current = null;
+        runInline(
+          useTokenCraftStore.getState().rawText,
+          useTokenCraftStore.getState().selectedModel
+        );
+      };
+
+      workerRef.current = worker;
+    } catch {
+      console.warn("Web Worker unavailable — using main-thread tokenizer.");
+      workerRef.current = null;
     }
 
     return () => {
       workerRef.current?.terminate();
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      workerRef.current = null;
     };
-  }, [setTokenData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Trigger worker tokenization on rawText or selectedModel changes
+  // Debounced dispatch on input changes
   useEffect(() => {
-    setTokenData({ isProcessing: true });
-
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
     // High-performance debounce: 0ms for small texts, 40ms for large texts
     const delay = rawText.length > 5000 ? 40 : 0;
 
     debounceTimerRef.current = setTimeout(() => {
+      // Enter processing state only when real work is dispatched
+      // (prevents "Computing…" shimmer flicker between keystrokes)
+      const requestId = ++latestRequestIdRef.current;
+
       if (workerRef.current) {
-        workerRef.current.postMessage({
+        const payload: TokenizeRequest = {
+          id: requestId,
           text: rawText,
           model: selectedModel,
-        } as WorkerMessagePayload);
+        };
+        workerRef.current.postMessage(payload);
+      } else {
+        runInline(rawText, selectedModel, requestId);
       }
     }, delay);
 
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
-  }, [rawText, selectedModel, setTokenData]);
+  }, [rawText, selectedModel]);
+
+  /**
+   * Wire format ({tokens, count}) is translated to the store schema
+   * ({tokenChunks, tokenCount}) by mapStatsToStorePatch — never spread the
+   * response directly into setTokenData.
+   */
+  function applyStats(stats: TokenizeStats) {
+    setTokenData({ ...mapStatsToStorePatch(stats), isProcessing: false });
+  }
+
+  /** Main-thread fallback for environments without Web Workers. */
+  async function runInline(text: string, model: string, requestId?: number) {
+    setTokenData({ isProcessing: true });
+    try {
+      // Dynamic import keeps gpt-tokenizer out of the main bundle unless needed
+      const { tokenizeTextSafe } = await import("../_lib/tokenize");
+      const stats = tokenizeTextSafe(text, model);
+      if (requestId !== undefined && requestId !== latestRequestIdRef.current)
+        return;
+      if (stats) {
+        applyStats(stats);
+      } else {
+        setTokenData({ isProcessing: false });
+      }
+    } catch {
+      setTokenData({ isProcessing: false });
+    }
+  }
 }

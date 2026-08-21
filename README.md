@@ -3,7 +3,7 @@
 > **Tier-0 Developer-Grade BPE Tokenizer, Prompt Optimizer & Multi-Model Cost Engine**  
 > *100% Client-Side Local Compute • Zero Cloud Telemetry • Obsidian Dark Studio Aesthetic*
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.1.7-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-blue?style=flat-square&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
@@ -72,7 +72,7 @@ Engineered with an obsidian-dark, staff-level developer aesthetic inspired by Li
 
 ## 🛠️ Tech Stack & Architecture
 
-- **Framework**: [Next.js 15.1 (App Router)](https://nextjs.org/)
+- **Framework**: [Next.js 15.5 (App Router)](https://nextjs.org/)
 - **UI Library**: [React 19](https://react.dev/)
 - **Language**: [TypeScript 5.7](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS 3.4](https://tailwindcss.com/) with Custom Tier-0 Obsidian Design System

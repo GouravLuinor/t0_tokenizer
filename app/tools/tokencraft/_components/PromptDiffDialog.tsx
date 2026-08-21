@@ -21,18 +21,16 @@ import {
   TrendingDown,
   CheckCircle2,
 } from "lucide-react";
-import { formatNumber } from "@/lib/utils";
+import { copyText } from "@/lib/clipboard";
 
 export function PromptDiffDialog() {
-  const {
-    diffModalOpen,
-    setDiffModalOpen,
-    minifiedPreview,
-    minifyOptions,
-    setMinifyOptions,
-    applyMinification,
-    rawText,
-  } = useTokenCraftStore();
+  const diffModalOpen = useTokenCraftStore((s) => s.diffModalOpen);
+  const setDiffModalOpen = useTokenCraftStore((s) => s.setDiffModalOpen);
+  const minifiedPreview = useTokenCraftStore((s) => s.minifiedPreview);
+  const minifyOptions = useTokenCraftStore((s) => s.minifyOptions);
+  const setMinifyOptions = useTokenCraftStore((s) => s.setMinifyOptions);
+  const applyMinification = useTokenCraftStore((s) => s.applyMinification);
+  const rawText = useTokenCraftStore((s) => s.rawText);
 
   const [copied, setCopied] = useState(false);
 
@@ -40,14 +38,16 @@ export function PromptDiffDialog() {
 
   const handleCopyMinified = async () => {
     if (!minifiedPreview.minifiedText) return;
-    await navigator.clipboard.writeText(minifiedPreview.minifiedText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyText(minifiedPreview.minifiedText);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
     <Dialog open={diffModalOpen} onOpenChange={setDiffModalOpen}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-6 bg-surface-default border border-surface-border shadow-elevated rounded-2xl overflow-hidden glass-edge">
+      <DialogContent className="w-[95vw] max-w-[1500px] max-h-[90vh] flex flex-col p-6 bg-surface-default border border-surface-border shadow-elevated rounded-2xl overflow-hidden glass-edge">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -92,7 +92,7 @@ export function PromptDiffDialog() {
                 onChange={(e) =>
                   setMinifyOptions({ stripComments: e.target.checked })
                 }
-                className="rounded bg-surface-default border-surface-border text-emerald-500 focus:ring-0"
+                className="rounded bg-surface-default border-surface-border accent-emerald-500 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
               />
               <span>Strip Comments</span>
             </label>
@@ -104,7 +104,7 @@ export function PromptDiffDialog() {
                 onChange={(e) =>
                   setMinifyOptions({ collapseWhitespace: e.target.checked })
                 }
-                className="rounded bg-surface-default border-surface-border text-emerald-500 focus:ring-0"
+                className="rounded bg-surface-default border-surface-border accent-emerald-500 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
               />
               <span>Collapse Whitespace</span>
             </label>
@@ -116,7 +116,7 @@ export function PromptDiffDialog() {
                 onChange={(e) =>
                   setMinifyOptions({ compactTables: e.target.checked })
                 }
-                className="rounded bg-surface-default border-surface-border text-emerald-500 focus:ring-0"
+                className="rounded bg-surface-default border-surface-border accent-emerald-500 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
               />
               <span>Compact Tables</span>
             </label>
@@ -128,7 +128,7 @@ export function PromptDiffDialog() {
                 onChange={(e) =>
                   setMinifyOptions({ minifyJson: e.target.checked })
                 }
-                className="rounded bg-surface-default border-surface-border text-emerald-500 focus:ring-0"
+                className="rounded bg-surface-default border-surface-border accent-emerald-500 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
               />
               <span>Minify JSON</span>
             </label>
@@ -141,7 +141,7 @@ export function PromptDiffDialog() {
           <div className="flex flex-col rounded-xl border border-surface-border bg-surface-subtle/70 overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2 border-b border-surface-border bg-surface-default text-xs font-mono text-zinc-400">
               <span className="tabular-nums">Original (<NumberTicker value={minifiedPreview.originalChars} /> chars)</span>
-              <span className="text-[10px] text-zinc-500 tabular-nums">
+              <span className="text-[10px] text-zinc-400 tabular-nums">
                 {rawText.split("\n").length} lines
               </span>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useId } from "react";
 import { cn } from "@/lib/utils";
 
 interface DotGridProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -19,6 +19,7 @@ export function DotGrid({
   fadeEdges = true,
   ...props
 }: DotGridProps) {
+  const patternId = useId();
   return (
     <div
       className={cn(
@@ -35,7 +36,7 @@ export function DotGrid({
       >
         <defs>
           <pattern
-            id="dot-grid-pattern"
+            id={patternId}
             width={gap}
             height={gap}
             patternUnits="userSpaceOnUse"
@@ -48,7 +49,7 @@ export function DotGrid({
             />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#dot-grid-pattern)" />
+        <rect width="100%" height="100%" fill={`url(#${patternId})`} />
       </svg>
     </div>
   );

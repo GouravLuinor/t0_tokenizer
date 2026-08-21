@@ -44,8 +44,15 @@ export function minifyPromptWithOptions(
   let cleaned = text;
 
   // 1. Remove HTML / Markdown comments if enabled: <!-- comment -->
+  //    Fenced code blocks are preserved verbatim — a <!-- --> inside ```html
+  //    is content, not prompt scaffolding.
   if (options.stripComments) {
-    cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, "");
+    cleaned = cleaned
+      .split(/(```[\s\S]*?```)/g)
+      .map((segment, i) =>
+        i % 2 === 1 ? segment : segment.replace(/<!--[\s\S]*?-->/g, "")
+      )
+      .join("");
   }
 
   // 2. Process line by line

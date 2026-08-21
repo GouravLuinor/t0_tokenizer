@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -7,6 +8,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: "TokenCraft & Context Optimizer | NorAI Tier-0 Flagship",
   description:
     "Zero-latency, in-browser multi-model BPE tokenization, real-time context safety inspection, dynamic cost projection, and prompt minification.",

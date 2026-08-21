@@ -5,7 +5,6 @@ import { useTokenCraftStore } from "../_store/useTokenCraftStore";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { BorderBeam } from "@/components/ui/border-beam";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,21 +26,37 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/lib/utils";
+import { copyText } from "@/lib/clipboard";
 
-export function MultiModelCostMatrix() {
-  const {
-    tokenCount,
-    batchVolume,
-    setBatchVolume,
-    outputMultiplier,
-    setOutputMultiplier,
-    selectedModel,
-    setSelectedModel,
-    modelsRegistry,
-    isSyncingPrices,
-    lastSyncedAt,
-    syncLivePrices,
-  } = useTokenCraftStore();
+function escapeCsvField(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+function triggerBlobDownload(content: string, mimeType: string, filename: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  // Release the blob reference — browsers keep object URLs alive until revoked
+  URL.revokeObjectURL(url);
+}
+
+export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
+  const tokenCount = useTokenCraftStore((s) => s.tokenCount);
+  const batchVolume = useTokenCraftStore((s) => s.batchVolume);
+  const setBatchVolume = useTokenCraftStore((s) => s.setBatchVolume);
+  const outputMultiplier = useTokenCraftStore((s) => s.outputMultiplier);
+  const setOutputMultiplier = useTokenCraftStore(
+    (s) => s.setOutputMultiplier
+  );
+  const selectedModel = useTokenCraftStore((s) => s.selectedModel);
+  const setSelectedModel = useTokenCraftStore((s) => s.setSelectedModel);
+  const modelsRegistry = useTokenCraftStore((s) => s.modelsRegistry);
+  const isSyncingPrices = useTokenCraftStore((s) => s.isSyncingPrices);
+  const lastSyncedAt = useTokenCraftStore((s) => s.lastSyncedAt);
+  const syncLivePrices = useTokenCraftStore((s) => s.syncLivePrices);
 
   const [copiedReport, setCopiedReport] = useState(false);
   const [providerFilter, setProviderFilter] = useState<string>("All");
@@ -88,7 +103,7 @@ export function MultiModelCostMatrix() {
       md += `| **${m.name}** | ${m.provider} | $${m.inputCostPer1M.toFixed(3)} | $${m.cachedInputCostPer1M.toFixed(3)} | $${m.outputCostPer1M.toFixed(3)} | ${formatCurrency(singleTotal, 5)} | ${formatCurrency(batchTotal, 2)} | ${savings > 0 ? `Save ${formatCurrency(savings, 2)}` : "$0.00"} |\n`;
     });
 
-    await navigator.clipboard.writeText(md);
+    await copyText(md);
     setCopiedReport(true);
     setTimeout(() => setCopiedReport(false), 2000);
   };
@@ -118,14 +133,11 @@ export function MultiModelCostMatrix() {
       }),
     };
 
-    const blob = new Blob([JSON.stringify(reportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `tokencraft-cost-report-${Date.now()}.json`;
-    a.click();
+    triggerBlobDownload(
+      JSON.stringify(reportData, null, 2),
+      "application/json",
+      `tokencraft-cost-report-${Date.now()}.json`
+    );
   };
 
   const handleDownloadCSV = () => {
@@ -139,22 +151,17 @@ export function MultiModelCostMatrix() {
       const batchCached = (singleCached + singleOutput) * batchVolume;
       const savings = Math.max(0, batchTotal - batchCached);
 
-      csv += `"${m.name}","${m.provider}","${m.family}",${m.inputCostPer1M},${m.cachedInputCostPer1M},${m.outputCostPer1M},${singleTotal.toFixed(6)},${batchTotal.toFixed(4)},${batchCached.toFixed(4)},${savings.toFixed(4)}\n`;
+      csv += `${escapeCsvField(m.name)},${escapeCsvField(m.provider)},${escapeCsvField(m.family)},${m.inputCostPer1M},${m.cachedInputCostPer1M},${m.outputCostPer1M},${singleTotal.toFixed(6)},${batchTotal.toFixed(4)},${batchCached.toFixed(4)},${savings.toFixed(4)}\n`;
     });
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `tokencraft-pricing-${Date.now()}.csv`;
-    a.click();
+    triggerBlobDownload(csv, "text/csv", `tokencraft-pricing-${Date.now()}.csv`);
   };
 
   return (
     <div
       role="region"
       aria-label="Multi-Model Cost Projection and Pricing Matrix"
-      className="flex flex-col p-5 rounded-xl border border-surface-border bg-surface-default shadow-sm transition-all duration-200 hover:border-surface-borderHover"
+      className="flex flex-col p-5 rounded-xl border border-surface-border bg-surface-default shadow-sm transition-all duration-200 hover:border-surface-borderHover lg:min-h-0 lg:h-full overflow-hidden"
     >
       {/* Matrix Header */}
       <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-surface-border">
@@ -269,8 +276,9 @@ export function MultiModelCostMatrix() {
               <button
                 key={step}
                 onClick={() => setBatchVolume(step)}
-                aria-label={`Set batch volume to ${step}`}
-                className={`hover:text-zinc-200 transition-colors tabular-nums ${
+                aria-pressed={batchVolume === step}
+                aria-label={`Set batch volume to ${formatNumber(step)}`}
+                className={`hover:text-zinc-200 transition-colors duration-150 tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 rounded ${
                   batchVolume === step ? "text-sky-400 font-bold" : ""
                 }`}
               >
@@ -296,8 +304,9 @@ export function MultiModelCostMatrix() {
               <button
                 key={opt.value}
                 onClick={() => setOutputMultiplier(opt.value)}
+                aria-pressed={outputMultiplier === opt.value}
                 aria-label={`Set output token ratio to ${opt.label}`}
-                className={`py-1 rounded text-[10px] font-mono transition-all text-center tabular-nums ${
+                className={`py-1 rounded text-[10px] font-mono transition-all duration-150 text-center tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60 ${
                   outputMultiplier === opt.value
                     ? "bg-zinc-100 text-zinc-950 font-semibold shadow-sm"
                     : "bg-surface-elevated text-zinc-400 hover:text-zinc-200 border border-surface-border"
@@ -316,12 +325,13 @@ export function MultiModelCostMatrix() {
 
       {/* Provider Filter Tabs */}
       <div className="flex items-center gap-1 mb-3 overflow-x-auto pb-1 text-xs font-mono">
-        <span className="text-zinc-500 text-[10px] uppercase tracking-wider mr-1">Filter:</span>
+        <span className="text-zinc-400 text-[10px] uppercase tracking-wider mr-1">Filter:</span>
         {providers.map((p) => (
           <button
             key={p}
             onClick={() => setProviderFilter(p)}
-            className={`px-2 py-0.5 rounded text-[11px] transition-colors ${
+            aria-pressed={providerFilter === p}
+            className={`px-2 py-0.5 rounded text-[11px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 ${
               providerFilter === p
                 ? "bg-zinc-200 text-zinc-950 font-semibold"
                 : "bg-surface-subtle text-zinc-400 hover:text-zinc-200 border border-surface-border"
@@ -333,10 +343,10 @@ export function MultiModelCostMatrix() {
       </div>
 
       {/* Pricing Comparison Table (Rule §7: hairline rows, mono nums, left accent border) */}
-      <div className="overflow-x-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
         <table className="w-full text-left font-mono text-xs border-collapse">
           <thead>
-            <tr className="border-b border-surface-border text-zinc-500 text-[10px] uppercase tracking-wider">
+            <tr className="border-b border-surface-border text-zinc-400 text-[10px] uppercase tracking-wider">
               <th scope="col" className="py-2.5 px-3">Model</th>
               <th scope="col" className="py-2.5 px-3">Standard Input</th>
               <th scope="col" className="py-2.5 px-3">Cached Prompt</th>
@@ -378,7 +388,15 @@ export function MultiModelCostMatrix() {
                 <tr
                   key={key}
                   onClick={() => setSelectedModel(key)}
-                  className={`relative transition-colors cursor-pointer group ${
+                  tabIndex={0}
+                  aria-selected={isSelected}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedModel(key);
+                    }
+                  }}
+                  className={`relative transition-colors duration-150 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-400/60 ${
                     isSelected
                       ? "bg-surface-elevated/80 border-l-2 border-l-sky-400"
                       : "hover:bg-surface-elevated/40"
@@ -400,7 +418,7 @@ export function MultiModelCostMatrix() {
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="text-[10px] text-zinc-400">
                       {model.provider} • {model.family}
                     </span>
                   </td>
@@ -409,7 +427,7 @@ export function MultiModelCostMatrix() {
                   <td className="py-3 px-3 text-zinc-300 tabular-nums">
                     <div>${model.inputCostPer1M.toFixed(3)} / 1M</div>
                     {estimatedOutputTokens > 0 && (
-                      <div className="text-[10px] text-zinc-500">
+                      <div className="text-[10px] text-zinc-400">
                         out: ${model.outputCostPer1M.toFixed(3)}
                       </div>
                     )}
@@ -465,5 +483,5 @@ export function MultiModelCostMatrix() {
       </div>
     </div>
   );
-}
+});
 

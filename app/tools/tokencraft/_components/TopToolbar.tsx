@@ -3,8 +3,9 @@
 import React from "react";
 import {
   useTokenCraftStore,
-  PROMPT_PRESETS,
 } from "../_store/useTokenCraftStore";
+import { PROMPT_PRESETS } from "../_lib/presets";
+import { getCurrentModel, encodingDisclosure } from "../_lib/modelRegistry";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,36 +27,28 @@ import {
   Undo2,
 } from "lucide-react";
 
-export function TopToolbar() {
-  const {
-    selectedModel,
-    setSelectedModel,
-    modelsRegistry,
-    loadPreset,
-    generateMinifyPreview,
-    revertMinification,
-    previousText,
-    setCommandPaletteOpen,
-    rawText,
-    isProcessing,
-  } = useTokenCraftStore();
+export const TopToolbar = React.memo(function TopToolbar() {
+  const selectedModel = useTokenCraftStore((s) => s.selectedModel);
+  const setSelectedModel = useTokenCraftStore((s) => s.setSelectedModel);
+  const modelsRegistry = useTokenCraftStore((s) => s.modelsRegistry);
+  const loadPreset = useTokenCraftStore((s) => s.loadPreset);
+  const generateMinifyPreview = useTokenCraftStore(
+    (s) => s.generateMinifyPreview
+  );
+  const revertMinification = useTokenCraftStore(
+    (s) => s.revertMinification
+  );
+  const hasPreviousText = useTokenCraftStore((s) => s.previousText !== null);
+  const setCommandPaletteOpen = useTokenCraftStore(
+    (s) => s.setCommandPaletteOpen
+  );
+  const hasText = useTokenCraftStore((s) => s.rawText.length > 0);
+  const isProcessing = useTokenCraftStore((s) => s.isProcessing);
 
-  const currentModel =
-    modelsRegistry[selectedModel] ||
-    Object.values(modelsRegistry)[0] || {
-      id: "claude-sonnet-5",
-      name: "Claude Sonnet 5",
-      provider: "Anthropic",
-      family: "Claude BPE",
-      contextWindow: 1000000,
-      inputCostPer1M: 2.0,
-      cachedInputCostPer1M: 0.2,
-      outputCostPer1M: 10.0,
-      badgeText: "1.0M",
-    };
+  const currentModel = getCurrentModel(modelsRegistry, selectedModel);
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4 p-3.5 border border-surface-border bg-surface-subtle/80 backdrop-blur-md rounded-xl glass-edge-subtle">
+    <header className="shrink-0 flex flex-wrap items-center justify-between gap-4 p-3.5 border border-surface-border bg-surface-subtle/80 backdrop-blur-md rounded-xl glass-edge-subtle">
       {/* Brand & App Identifier */}
       <div className="flex items-center gap-3">
         <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-surface-default border border-surface-border text-sky-400 font-mono font-extrabold text-sm tracking-tight shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] select-none">
@@ -125,8 +118,14 @@ export function TopToolbar() {
               >
                 <div className="flex flex-col">
                   <span className="font-medium text-zinc-200">{model.name}</span>
-                  <span className="text-[10px] text-zinc-500 font-mono">
+                  <span className="text-[10px] text-zinc-400 font-mono">
                     {model.provider} • {model.family}
+                    {encodingDisclosure(model.family) && (
+                      <span className="text-amber-400/90">
+                        {" "}
+                        • {encodingDisclosure(model.family)}
+                      </span>
+                    )}
                   </span>
                 </div>
                 <Badge
@@ -175,7 +174,7 @@ export function TopToolbar() {
         </DropdownMenu>
 
         {/* Revert Minification Button (if available) */}
-        {previousText !== null && (
+        {hasPreviousText && (
           <Button
             variant="outline"
             size="sm"
@@ -194,7 +193,7 @@ export function TopToolbar() {
           variant="default"
           size="sm"
           onClick={generateMinifyPreview}
-          disabled={!rawText || isProcessing}
+          disabled={!hasText || isProcessing}
           className="gap-1.5 text-xs font-mono bg-zinc-100 text-zinc-950 hover:bg-white font-semibold h-8 transition-transform active:scale-[0.97]"
           aria-label="Minify prompt"
         >
@@ -204,5 +203,5 @@ export function TopToolbar() {
       </div>
     </header>
   );
-}
+});
 

@@ -1,11 +1,13 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import {
   minifyPromptWithOptions,
   DEFAULT_MINIFY_OPTIONS,
   type MinifyOptions,
   type MinifyResult,
 } from "../_lib/promptMinifier";
-import type { TokenChunk } from "../_workers/tokenizer.worker";
+import type { TokenChunk } from "../_lib/tokenize";
+import { PROMPT_PRESETS, DEFAULT_PRESET_KEY } from "../_lib/presets";
 import {
   INITIAL_MODEL_REGISTRY,
   fetchLiveModelPricing,
@@ -13,74 +15,6 @@ import {
 } from "../_lib/priceService";
 
 export { type ModelPricing, INITIAL_MODEL_REGISTRY as MODEL_REGISTRY };
-
-export const PROMPT_PRESETS: Record<
-  string,
-  { label: string; description: string; content: string }
-> = {
-  "code-reviewer": {
-    label: "Code Reviewer",
-    description: "Multi-layered Senior Staff Engineer code audit prompt",
-    content: `You are an elite Staff Frontend Engineer at NorAI with 15+ years of experience in high-performance web systems.
-
-Review the following TypeScript and React codebase for:
-1. Spacing and modular scale inconsistencies against an 8px spatial grid.
-2. Main-thread execution bottlenecks (computations > 16ms causing frame drops).
-3. Missing interaction states (Hover, Active, Focus, Loading, Empty).
-4. Contrast ratio violations against dark surfaces under WCAG 2.1 AAA.
-
-Please provide concise, surgical code diffs with explanatory annotations.`,
-  },
-  "system-prompt": {
-    label: "System Prompt",
-    description: "Autonomous Agent tool-use and constraint contract",
-    content: `You are Antigravity, an autonomous agentic pair programmer.
-Your goal is to execute complex engineering requests with zero unnecessary roundtrips.
-
-Operational Principles:
-- Never guess file structures; use list_dir and grep_search.
-- Write modular, highly reusable components with complete TypeScript typing.
-- Always provide accessible ARIA attributes and keyboard navigation.
-- Prioritize zero-latency client-side computation using Web Workers when handling high-volume datasets.`,
-  },
-  "rag-context": {
-    label: "RAG Context Dump",
-    description: "Dense vector retrieval chunk with tabular metadata",
-    content: `### Retrieved Document Chunk #8492
-Source: /docs/architecture/norai-blueprint-v3.md
-Score: 0.9412
-Date: 2026-08-18
-
-| Module | Purpose | Status | Target FPS |
-| :--- | :--- | :--- | :--- |
-| Worker Threading | Offloads BPE tokenization | Active | 60 FPS |
-| Context Gauge | SVG real-time visual safety | Active | 60 FPS |
-| Cost Matrix | Reactive multi-model pricing | Active | 60 FPS |
-| AST Minifier | Regex & whitespace reduction | Active | 60 FPS |
-
-Ensure all derived computations complete in < 2ms to prevent user input latency.`,
-  },
-  "json-payload": {
-    label: "Nested JSON Payload",
-    description: "Complex API JSON schema for testing minification",
-    content: `{
-  "system": "TokenCraft Engine",
-  "version": "3.0.0",
-  "config": {
-    "theme": "obsidian",
-    "features": {
-      "worker": true,
-      "caching": true,
-      "minification": true
-    },
-    "tokens": [
-      { "id": 13225, "text": "Hello", "bytes": 5 },
-      { "id": 16455, "text": " NorAI", "bytes": 6 }
-    ]
-  }
-}`,
-  },
-};
 
 export type VisualViewMode = "chips" | "ids" | "heatmap" | "analytics";
 
@@ -126,8 +60,10 @@ interface TokenCraftState {
   syncLivePrices: () => Promise<void>;
 }
 
-export const useTokenCraftStore = create<TokenCraftState>((set, get) => ({
-  rawText: PROMPT_PRESETS["code-reviewer"].content,
+export const useTokenCraftStore = create<TokenCraftState>()(
+  persist<TokenCraftState, [], [], PersistedWorkspace>(
+    (set, get) => ({
+  rawText: PROMPT_PRESETS[DEFAULT_PRESET_KEY].content,
   previousText: null,
   selectedModel: "claude-sonnet-5",
   modelsRegistry: INITIAL_MODEL_REGISTRY,
@@ -154,7 +90,7 @@ export const useTokenCraftStore = create<TokenCraftState>((set, get) => ({
   setBatchVolume: (batchVolume) => set({ batchVolume }),
   setOutputMultiplier: (outputMultiplier) => set({ outputMultiplier }),
   setViewMode: (viewMode) => set({ viewMode }),
-  setTokenData: (data) => set((state) => ({ ...state, ...data })),
+  setTokenData: (data) => set(data),
   setDiffModalOpen: (diffModalOpen) => set({ diffModalOpen }),
   setCommandPaletteOpen: (commandPaletteOpen) => set({ commandPaletteOpen }),
 
@@ -227,4 +163,30 @@ export const useTokenCraftStore = create<TokenCraftState>((set, get) => ({
       set({ isSyncingPrices: false });
     }
   },
-}));
+}),
+    {
+      name: "tokencraft-workspace",
+      version: 1,
+      storage: createJSONStorage(() => localStorage),
+      // Persist the user's work and preferences only — never derived
+      // tokenization state (recomputed by the worker on rehydrate)
+      partialize: (s) => ({
+        rawText: s.rawText,
+        selectedModel: s.selectedModel,
+        viewMode: s.viewMode,
+        batchVolume: s.batchVolume,
+        outputMultiplier: s.outputMultiplier,
+      }),
+      // SSR-safe: hydration is triggered manually after mount
+      skipHydration: true,
+    }
+  )
+);
+
+interface PersistedWorkspace {
+  rawText: string;
+  selectedModel: string;
+  viewMode: VisualViewMode;
+  batchVolume: number;
+  outputMultiplier: number;
+}

@@ -34,3 +34,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Internal documentation & strategy docs
+/docs/
+*.docx
+design_tokens.json
+
+# IDE agent configs
+/.agents/

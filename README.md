@@ -177,7 +177,6 @@ To run using the automated zero-downtime deployment script:
 │       ├── border-beam.tsx
 │       ├── button.tsx, card.tsx, dialog.tsx, etc.
 │       └── spotlight-card.tsx
-├── docs/                                 # Design specifications & system blueprints
 ├── public/                               # Static assets and favicons
 ├── Caddyfile                             # Caddy HTTP/3 & TLS configuration
 ├── Dockerfile                            # Multi-stage standalone Next.js container build

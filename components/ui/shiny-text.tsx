@@ -19,6 +19,8 @@ export function ShinyText({
   const colorClass =
     shineColor === "emerald"
       ? "shiny-text-emerald"
+      : shineColor === "cyan"
+      ? "shiny-text-cyan"
       : "shiny-text";
 
   return (

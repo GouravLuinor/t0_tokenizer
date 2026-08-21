@@ -178,7 +178,7 @@ export function MultiModelCostMatrix() {
             aria-label="Sync real-time model rates"
           >
             <RefreshCw
-              className={`w-3 h-3 mr-1.5 text-emerald-400 ${isSyncingPrices ? "animate-spin" : ""}`}
+              className={`w-3 h-3 mr-1.5 text-sky-400 ${isSyncingPrices ? "animate-spin" : ""}`}
               aria-hidden="true"
             />
             <span className="font-mono text-[11px]">
@@ -213,7 +213,7 @@ export function MultiModelCostMatrix() {
                 className="flex items-center gap-2 text-xs cursor-pointer hover:bg-surface-elevated focus:bg-surface-elevated font-mono"
               >
                 {copiedReport ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+                  <Check className="w-3.5 h-3.5 text-sky-400" aria-hidden="true" />
                 ) : (
                   <FileText className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
                 )}
@@ -236,7 +236,7 @@ export function MultiModelCostMatrix() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <span className="text-xs font-mono px-2 py-0.5 rounded bg-surface-elevated border border-surface-border text-emerald-400 tabular-nums font-medium">
+          <span className="text-xs font-mono px-2 py-0.5 rounded bg-surface-elevated border border-surface-border text-sky-400 tabular-nums font-medium">
             <NumberTicker value={batchVolume} /> calls
           </span>
         </div>
@@ -248,10 +248,10 @@ export function MultiModelCostMatrix() {
         <div className="flex flex-col gap-2 p-3 rounded-xl bg-surface-subtle/70 border border-surface-border">
           <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
             <span className="flex items-center gap-1.5 text-zinc-300">
-              <Calculator className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+              <Calculator className="w-3.5 h-3.5 text-sky-400" aria-hidden="true" />
               Batch Scale Multiplier
             </span>
-            <span className="text-emerald-400 font-medium tabular-nums">
+            <span className="text-sky-400 font-medium tabular-nums">
               <NumberTicker value={batchVolume} /> runs
             </span>
           </div>
@@ -271,7 +271,7 @@ export function MultiModelCostMatrix() {
                 onClick={() => setBatchVolume(step)}
                 aria-label={`Set batch volume to ${step}`}
                 className={`hover:text-zinc-200 transition-colors tabular-nums ${
-                  batchVolume === step ? "text-emerald-400 font-bold" : ""
+                  batchVolume === step ? "text-sky-400 font-bold" : ""
                 }`}
               >
                 {step >= 1000 ? `${step / 1000}k` : step}
@@ -380,7 +380,7 @@ export function MultiModelCostMatrix() {
                   onClick={() => setSelectedModel(key)}
                   className={`relative transition-colors cursor-pointer group ${
                     isSelected
-                      ? "bg-surface-elevated/80 border-l-2 border-l-emerald-400"
+                      ? "bg-surface-elevated/80 border-l-2 border-l-sky-400"
                       : "hover:bg-surface-elevated/40"
                   }`}
                 >
@@ -395,7 +395,7 @@ export function MultiModelCostMatrix() {
                         {model.name}
                       </span>
                       {isSelected && (
-                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold">
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30 font-semibold">
                           ACTIVE
                         </span>
                       )}
@@ -418,10 +418,10 @@ export function MultiModelCostMatrix() {
                   {/* Cached Cost & Savings Badge */}
                   <td className="py-3 px-3 tabular-nums">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-emerald-400 font-medium">
+                      <span className="text-sky-400 font-medium">
                         ${model.cachedInputCostPer1M.toFixed(3)} / 1M
                       </span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
                         -{savingsPercent}%
                       </span>
                     </div>
@@ -436,7 +436,7 @@ export function MultiModelCostMatrix() {
                       />
                     </div>
                     {singleRunTotalCached < singleRunTotalStandard && (
-                      <div className="text-[10px] text-emerald-400">
+                      <div className="text-[10px] text-sky-400">
                         cached: {formatCurrency(singleRunTotalCached, 5)}
                       </div>
                     )}
@@ -451,7 +451,7 @@ export function MultiModelCostMatrix() {
                       />
                     </div>
                     {batchSavings > 0 && (
-                      <div className="text-[10px] text-emerald-400 font-medium flex items-center justify-end gap-1">
+                      <div className="text-[10px] text-sky-400 font-medium flex items-center justify-end gap-1">
                         <TrendingDown className="w-3 h-3" aria-hidden="true" />
                         <span>Save {formatCurrency(batchSavings, 2)}</span>
                       </div>

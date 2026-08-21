@@ -58,21 +58,18 @@ export function TopToolbar() {
     <header className="flex flex-wrap items-center justify-between gap-4 p-3.5 border border-surface-border bg-surface-subtle/80 backdrop-blur-md rounded-xl glass-edge-subtle">
       {/* Brand & App Identifier */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-surface-default border border-surface-border text-emerald-400 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-          <Cpu className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-surface-default border border-surface-border text-sky-400 font-mono font-extrabold text-sm tracking-tight shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] select-none">
+          TC
         </div>
         <div>
           <div className="flex items-center gap-2">
             <AnimatedGradientText
-              fromColor="#10B981"
+              fromColor="#38BDF8"
               toColor="#06B6D4"
               className="text-sm font-semibold tracking-tight"
             >
               TokenCraft
             </AnimatedGradientText>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-elevated text-emerald-400/90 border border-emerald-500/20 font-medium">
-              v1.0 • BPE
-            </span>
           </div>
           <p className="text-xs text-zinc-400 font-mono">
             BPE Tokenizer & Multi-Model Cost Engine
@@ -107,7 +104,7 @@ export function TopToolbar() {
               className="gap-2 bg-surface-default border-surface-border font-mono text-xs text-zinc-200 hover:text-white hover:border-surface-borderHover h-8"
               aria-label={`Select Tokenizer Model, currently ${currentModel.name}`}
             >
-              <Cpu className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+              <Cpu className="w-3.5 h-3.5 text-sky-400" aria-hidden="true" />
               <span>{currentModel.name}</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-elevated text-zinc-300 border border-surface-border">
                 {currentModel.badgeText}
@@ -204,17 +201,6 @@ export function TopToolbar() {
           <Minimize2 className="w-3.5 h-3.5 text-zinc-950" aria-hidden="true" />
           <span>Minify Prompt</span>
         </Button>
-
-        {/* Client-Side Privacy Badge - Linear Teardown spec */}
-        <div className="hidden sm:flex items-center gap-2 h-8 px-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-xs font-mono text-zinc-300">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-          </span>
-          <span className="text-[11px] font-medium text-emerald-400/90">
-            Local Engine
-          </span>
-        </div>
       </div>
     </header>
   );

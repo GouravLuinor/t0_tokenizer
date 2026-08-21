@@ -245,7 +245,7 @@ export function CommandPalette() {
 
         {/* Search Input Bar */}
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-surface-border bg-surface-subtle/80">
-          <Command className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+          <Command className="w-4 h-4 text-sky-400" aria-hidden="true" />
           <input
             type="text"
             placeholder="Type a command or search actions…"
@@ -290,7 +290,7 @@ export function CommandPalette() {
                     <div
                       className={`p-1.5 rounded-md border transition-colors ${
                         isSelected
-                          ? "bg-surface-default border-emerald-500/30 text-emerald-400"
+                          ? "bg-surface-default border-sky-500/30 text-sky-400"
                           : "bg-surface-subtle border-surface-border text-zinc-400"
                       }`}
                     >
@@ -346,7 +346,7 @@ export function CommandPalette() {
               <span className="ml-1 text-zinc-400">Select</span>
             </span>
           </div>
-          <ShinyText shineColor="emerald" className="text-[10px]">
+          <ShinyText shineColor="cyan" className="text-[10px]">
             TokenCraft Studio
           </ShinyText>
         </div>

@@ -122,7 +122,7 @@ export function TokenInspectorPane() {
             <span className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-medium">
               BPE Token Inspector
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-surface-elevated text-emerald-400 border border-emerald-500/20 font-mono tabular-nums font-medium">
+            <span className="text-[10px] px-2 py-0.5 rounded bg-surface-elevated text-sky-400 border border-sky-500/20 font-mono tabular-nums font-medium">
               <NumberTicker value={tokenCount} /> {tokenCount === 1 ? "Token" : "Tokens"}
             </span>
           </div>
@@ -139,7 +139,7 @@ export function TokenInspectorPane() {
               title="BPE Color Boundary Chips"
               aria-label="View BPE Color Boundary Chips"
             >
-              <Layers className="w-3 h-3 text-emerald-400" aria-hidden="true" />
+              <Layers className="w-3 h-3 text-sky-400" aria-hidden="true" />
               <span className="hidden sm:inline">Chips</span>
             </button>
 
@@ -197,7 +197,7 @@ export function TokenInspectorPane() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Filter tokens by text or ID"
-              className="h-6 w-36 sm:w-48 pl-7 pr-2 rounded-md bg-surface-elevated border border-surface-border text-[11px] font-mono text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50"
+              className="h-6 w-36 sm:w-48 pl-7 pr-2 rounded-md bg-surface-elevated border border-surface-border text-[11px] font-mono text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-sky-500/50"
             />
           </div>
 
@@ -210,7 +210,7 @@ export function TokenInspectorPane() {
             aria-label="Copy token IDs as JSON"
           >
             {copiedIds ? (
-              <Check className="w-3 h-3 text-emerald-400 mr-1" aria-hidden="true" />
+              <Check className="w-3 h-3 text-sky-400 mr-1" aria-hidden="true" />
             ) : (
               <Copy className="w-3 h-3 mr-1" aria-hidden="true" />
             )}
@@ -226,7 +226,7 @@ export function TokenInspectorPane() {
             /* Clean Empty State Card */
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <div className="w-10 h-10 rounded-xl bg-surface-elevated border border-surface-border flex items-center justify-center mb-3 text-zinc-400 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-                <FileCode2 className="w-5 h-5 text-emerald-400" aria-hidden="true" />
+                <FileCode2 className="w-5 h-5 text-sky-400" aria-hidden="true" />
               </div>
               <h2 className="text-sm font-semibold text-zinc-200 mb-1">
                 No Tokens Generated
@@ -444,7 +444,7 @@ export function TokenInspectorPane() {
             </span>
             <span className="text-zinc-200 font-semibold text-[11px] tabular-nums">
               {isProcessing ? (
-                <ShinyText shineColor="emerald">Computing…</ShinyText>
+                <ShinyText shineColor="cyan">Computing…</ShinyText>
               ) : (
                 `${executionTimeMs} ms`
               )}
@@ -452,7 +452,7 @@ export function TokenInspectorPane() {
           </div>
 
           <div className="flex items-center gap-2 text-zinc-400 text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" aria-hidden="true" />
             <ShinyText shineColor="white" className="text-zinc-300 text-[10px]">
               BPE Engine Active
             </ShinyText>

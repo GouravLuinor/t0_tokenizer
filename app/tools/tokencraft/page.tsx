@@ -24,9 +24,9 @@ export default function TokenCraftPage() {
   }, [syncLivePrices]);
 
   return (
-    <div className="min-h-screen bg-background text-zinc-100 flex flex-col relative selection:bg-emerald-500/20">
+    <div className="min-h-screen bg-background text-zinc-100 flex flex-col relative selection:bg-sky-500/20">
       {/* Subtle top radial gradient ambient glow */}
-      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-64 bg-[radial-gradient(ellipse_50%_100%_at_50%_0%,rgba(16,185,129,0.06),transparent)]" />
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-64 bg-[radial-gradient(ellipse_50%_100%_at_50%_0%,rgba(56,189,248,0.06),transparent)]" />
 
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-6">
         {/* Top Control Toolbar */}
@@ -51,7 +51,7 @@ export default function TokenCraftPage() {
         {/* Studio-Grade Footer */}
         <footer className="flex flex-wrap items-center justify-between gap-4 py-4 px-1 border-t border-surface-border text-xs font-mono text-zinc-400">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" aria-hidden="true" />
             <span className="text-zinc-300 font-medium">TokenCraft Studio</span>
             <span className="text-zinc-500">•</span>
             <span className="text-zinc-400">BPE Tokenizer & Multi-Model Cost Engine</span>
@@ -63,7 +63,7 @@ export default function TokenCraftPage() {
               <span className="ml-1 text-zinc-400">Commands</span>
             </div>
             <span aria-hidden="true" className="text-zinc-600">•</span>
-            <ShinyText shineColor="emerald" className="text-[11px] text-emerald-400 font-medium">
+            <ShinyText shineColor="cyan" className="text-[11px] text-sky-400 font-medium">
               100% Client-Side Local Compute
             </ShinyText>
             <span aria-hidden="true" className="text-zinc-600">•</span>

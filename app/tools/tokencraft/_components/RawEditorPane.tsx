@@ -84,7 +84,7 @@ export function RawEditorPane() {
       onDrop={handleDrop}
       className={`flex flex-col h-[580px] rounded-xl border transition-all duration-200 bg-surface-default ${
         isDragging
-          ? "border-emerald-400/80 bg-surface-elevated ring-2 ring-emerald-500/20"
+          ? "border-sky-400/80 bg-surface-elevated ring-2 ring-sky-500/20"
           : "border-surface-border hover:border-surface-borderHover"
       }`}
     >
@@ -132,7 +132,7 @@ export function RawEditorPane() {
             aria-label="Copy input text"
           >
             {copied ? (
-              <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" aria-hidden="true" />
+              <Check className="w-3.5 h-3.5 text-sky-400 mr-1" aria-hidden="true" />
             ) : (
               <Copy className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
             )}
@@ -188,8 +188,8 @@ export function RawEditorPane() {
 
         {/* Drag Overlay Hint */}
         {isDragging && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-surface-default/95 backdrop-blur-md border-2 border-dashed border-emerald-400/60 m-2 rounded-xl pointer-events-none transition-all">
-            <Upload className="w-8 h-8 text-emerald-400 mb-2 animate-bounce" aria-hidden="true" />
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-surface-default/95 backdrop-blur-md border-2 border-dashed border-sky-400/60 m-2 rounded-xl pointer-events-none transition-all">
+            <Upload className="w-8 h-8 text-sky-400 mb-2 animate-bounce" aria-hidden="true" />
             <span className="text-sm font-medium text-zinc-200">
               Drop file to load content
             </span>

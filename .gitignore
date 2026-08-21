@@ -39,6 +39,11 @@ next-env.d.ts
 /docs/
 *.docx
 design_tokens.json
+t0_ideas.md
 
 # IDE agent configs
 /.agents/
+
+# Playwright artifacts
+/test-results/
+/playwright-report/

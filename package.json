@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "create:tool": "node ./scripts/create-tier0.mjs"
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "create:tool": "node ./scaffolder/bin/create-tier0.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
@@ -26,6 +28,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "^22.13.4",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",

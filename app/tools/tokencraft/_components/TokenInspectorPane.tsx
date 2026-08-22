@@ -17,6 +17,7 @@ import type { TokenChunk } from "../_lib/tokenize";
 import { Button } from "@/components/ui/button";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { ShinyText } from "@/components/ui/shiny-text";
+import { Skeleton } from "@/components/ui/skeleton";
 import { copyText } from "@/lib/clipboard";
 import { formatNumber, stringToHex } from "@/lib/utils";
 import {
@@ -539,7 +540,20 @@ export function TokenInspectorPane() {
 
       {/* Token Visualizer Body */}
       <div className="flex-1 min-h-0 p-4 font-mono text-xs">
-        {tokenChunks.length === 0 ? (
+        {tokenChunks.length === 0 && isProcessing ? (
+          /* First-compute skeleton — fills the same flex body, so swapping in
+             the stream never shifts layout */
+          <div
+            className="h-full min-h-[220px] flex flex-col justify-center gap-3 px-2"
+            role="status"
+            aria-label="Computing tokens"
+          >
+            <Skeleton className="h-4 w-[85%]" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-[92%]" />
+            <Skeleton className="h-4 w-[60%]" />
+          </div>
+        ) : tokenChunks.length === 0 ? (
           /* Clean Empty State Card */
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="w-10 h-10 rounded-xl bg-surface-elevated border border-surface-border flex items-center justify-center mb-3 text-zinc-400 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">

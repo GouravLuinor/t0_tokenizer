@@ -282,7 +282,7 @@ export const RawEditorPane = React.memo(function RawEditorPane() {
         {/* Drag Overlay Hint */}
         {isDragging && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-surface-default/95 backdrop-blur-md border-2 border-dashed border-sky-400/60 m-2 rounded-xl pointer-events-none transition-all duration-150 ease-out-expo">
-            <Upload className="w-8 h-8 text-sky-400 mb-2 animate-bounce" aria-hidden="true" />
+            <Upload className="w-8 h-8 text-sky-400 mb-2 animate-bounce motion-reduce:animate-none" aria-hidden="true" />
             <span className="text-sm font-medium text-zinc-200">
               Drop file to load content
             </span>

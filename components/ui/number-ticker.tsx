@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { useInView, useMotionValue, useSpring } from "framer-motion";
+import {
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+} from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface NumberTickerProps {
@@ -35,9 +40,10 @@ export function NumberTicker({
   });
   const isInView = useInView(ref, { once: false, margin: "0px" });
   const prevValueRef = useRef<number>(direction === "down" ? value : 0);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView || prefersReducedMotion) return;
     // Skip the spring entirely for tiny deltas (±2) so per-keystroke
     // increments feel instant rather than "swimmy"
     const delta = Math.abs(value - prevValueRef.current);
@@ -52,9 +58,11 @@ export function NumberTicker({
       motionValue.set(value);
     }, delay * 1000);
     return () => clearTimeout(timer);
-  }, [motionValue, isInView, delay, value]);
+  }, [motionValue, isInView, delay, value, prefersReducedMotion]);
 
   useEffect(() => {
+    // Reduced motion: never subscribe — the span keeps its static SSR text
+    if (prefersReducedMotion) return;
     const unsubscribe = springValue.on("change", (latest) => {
       if (ref.current) {
         if (formatter) {
@@ -70,7 +78,28 @@ export function NumberTicker({
     });
 
     return () => unsubscribe();
-  }, [springValue, decimalPlaces, prefix, suffix, formatter]);
+  }, [springValue, decimalPlaces, prefix, suffix, formatter, prefersReducedMotion]);
+
+  // Reduced motion: render the static final value — no spring, no subscription
+  if (prefersReducedMotion) {
+    return (
+      <span
+        className={cn(
+          "inline-block tabular-nums tracking-tight font-mono",
+          className
+        )}
+      >
+        {prefix}
+        {formatter
+          ? formatter(value)
+          : Intl.NumberFormat("en-US", {
+              minimumFractionDigits: decimalPlaces,
+              maximumFractionDigits: decimalPlaces,
+            }).format(value)}
+        {suffix}
+      </span>
+    );
+  }
 
   return (
     <span

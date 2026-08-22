@@ -685,7 +685,9 @@ export function TokenInspectorPane() {
         <div className="flex items-center gap-2 text-zinc-400 text-[10px]">
           <span
             className={`w-1.5 h-1.5 rounded-full ${
-              isProcessing ? "bg-amber-400 animate-pulse" : "bg-sky-400 animate-pulse"
+              isProcessing
+                ? "bg-amber-400 animate-pulse motion-reduce:animate-none"
+                : "bg-sky-400 animate-pulse motion-reduce:animate-none"
             }`}
             aria-hidden="true"
           />

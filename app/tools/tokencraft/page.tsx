@@ -68,7 +68,7 @@ export default function TokenCraftPage() {
         {/* Studio-Grade Footer */}
         <footer className="shrink-0 flex flex-wrap items-center justify-between gap-4 py-4 px-1 border-t border-surface-border text-xs font-mono text-zinc-400">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" aria-hidden="true" />
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
             <span className="text-zinc-300 font-medium">TokenCraft Studio</span>
             <span className="text-zinc-500">•</span>
             <span className="text-zinc-400">BPE Tokenizer & Multi-Model Cost Engine</span>

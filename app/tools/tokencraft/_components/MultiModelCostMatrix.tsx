@@ -185,7 +185,7 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
             aria-label="Sync real-time model rates"
           >
             <RefreshCw
-              className={`w-3 h-3 mr-1.5 text-sky-400 ${isSyncingPrices ? "animate-spin" : ""}`}
+              className={`w-3 h-3 mr-1.5 text-sky-400 ${isSyncingPrices ? "animate-spin motion-reduce:animate-none" : ""}`}
               aria-hidden="true"
             />
             <span className="font-mono text-[11px]">

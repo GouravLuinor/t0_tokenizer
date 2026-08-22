@@ -18,6 +18,7 @@ export function useTokenizer() {
   const rawText = useTokenCraftStore((s) => s.rawText);
   const selectedModel = useTokenCraftStore((s) => s.selectedModel);
   const setTokenData = useTokenCraftStore((s) => s.setTokenData);
+  const setWorkerDegraded = useTokenCraftStore((s) => s.setWorkerDegraded);
 
   const workerRef = useRef<Worker | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -40,6 +41,7 @@ export function useTokenizer() {
         // Worker died at runtime — recompute the current text inline
         worker.terminate();
         workerRef.current = null;
+        setWorkerDegraded(true);
         runInline(
           useTokenCraftStore.getState().rawText,
           useTokenCraftStore.getState().selectedModel
@@ -47,9 +49,11 @@ export function useTokenizer() {
       };
 
       workerRef.current = worker;
+      setWorkerDegraded(false);
     } catch {
       console.warn("Web Worker unavailable — using main-thread tokenizer.");
       workerRef.current = null;
+      setWorkerDegraded(true);
     }
 
     return () => {

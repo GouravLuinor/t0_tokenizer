@@ -29,6 +29,7 @@ import {
   BarChart3,
   Hash,
   Flame,
+  AlertTriangle,
 } from "lucide-react";
 
 /* ---------------------------------------------------------------------------
@@ -214,6 +215,7 @@ export function TokenInspectorPane() {
   const byteCount = useTokenCraftStore((s) => s.byteCount);
   const executionTimeMs = useTokenCraftStore((s) => s.executionTimeMs);
   const isProcessing = useTokenCraftStore((s) => s.isProcessing);
+  const isWorkerDegraded = useTokenCraftStore((s) => s.isWorkerDegraded);
   const viewMode = useTokenCraftStore((s) => s.viewMode);
   const setViewMode = useTokenCraftStore((s) => s.setViewMode);
 
@@ -516,6 +518,24 @@ export function TokenInspectorPane() {
           </span>
         </Button>
       </div>
+
+      {/* Worker-degraded banner — shown only when tokenization fell back to main thread */}
+      {isWorkerDegraded && (
+        <div
+          role="status"
+          className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-[11px] font-mono text-amber-300"
+        >
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+          <span>Main-thread mode active</span>
+        </div>
+      )}
+
+      {/* Completion announcer — single polite channel for tokenization results */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {!isProcessing && tokenCount > 0
+          ? `Tokenized ${formatNumber(tokenCount)} tokens`
+          : ""}
+      </span>
 
       {/* Token Visualizer Body */}
       <div className="flex-1 min-h-0 p-4 font-mono text-xs">

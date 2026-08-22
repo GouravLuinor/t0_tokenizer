@@ -180,6 +180,7 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
             size="sm"
             onClick={() => syncLivePrices()}
             disabled={isSyncingPrices}
+            aria-busy={isSyncingPrices || undefined}
             className="h-7 px-2.5 text-xs text-zinc-300 hover:text-white bg-surface-subtle border-surface-border hover:bg-surface-elevated"
             title="Fetch real-time model pricing from OpenRouter public API"
             aria-label="Sync real-time model rates"

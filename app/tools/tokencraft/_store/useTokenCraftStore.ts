@@ -35,6 +35,7 @@ interface TokenCraftState {
   isProcessing: boolean;
   executionTimeMs: number;
   viewMode: VisualViewMode;
+  isWorkerDegraded: boolean;
 
   // Modals & Options
   diffModalOpen: boolean;
@@ -49,6 +50,7 @@ interface TokenCraftState {
   setOutputMultiplier: (multiplier: number) => void;
   setViewMode: (mode: VisualViewMode) => void;
   setTokenData: (data: Partial<TokenCraftState>) => void;
+  setWorkerDegraded: (degraded: boolean) => void;
   setDiffModalOpen: (open: boolean) => void;
   setCommandPaletteOpen: (open: boolean) => void;
   setMinifyOptions: (options: Partial<MinifyOptions>) => void;
@@ -79,6 +81,7 @@ export const useTokenCraftStore = create<TokenCraftState>()(
   isProcessing: false,
   executionTimeMs: 0,
   viewMode: "chips",
+  isWorkerDegraded: false,
 
   diffModalOpen: false,
   commandPaletteOpen: false,
@@ -91,6 +94,7 @@ export const useTokenCraftStore = create<TokenCraftState>()(
   setOutputMultiplier: (outputMultiplier) => set({ outputMultiplier }),
   setViewMode: (viewMode) => set({ viewMode }),
   setTokenData: (data) => set(data),
+  setWorkerDegraded: (isWorkerDegraded) => set({ isWorkerDegraded }),
   setDiffModalOpen: (diffModalOpen) => set({ diffModalOpen }),
   setCommandPaletteOpen: (commandPaletteOpen) => set({ commandPaletteOpen }),
 

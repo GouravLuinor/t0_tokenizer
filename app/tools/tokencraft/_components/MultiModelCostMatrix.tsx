@@ -5,6 +5,7 @@ import { useTokenCraftStore } from "../_store/useTokenCraftStore";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -175,28 +176,32 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
         {/* Action Buttons: Live Rates Sync & Export */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Live Sync Action */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => syncLivePrices()}
-            disabled={isSyncingPrices}
-            aria-busy={isSyncingPrices || undefined}
-            className="h-7 px-2.5 text-xs text-zinc-300 hover:text-white bg-surface-subtle border-surface-border hover:bg-surface-elevated"
-            title="Fetch real-time model pricing from OpenRouter public API"
-            aria-label="Sync real-time model rates"
-          >
-            <RefreshCw
-              className={`w-3 h-3 mr-1.5 text-sky-400 ${isSyncingPrices ? "animate-spin motion-reduce:animate-none" : ""}`}
-              aria-hidden="true"
-            />
-            <span className="font-mono text-[11px]">
-              {isSyncingPrices
-                ? "Syncing…"
-                : lastSyncedAt
-                ? `Live (${lastSyncedAt})`
-                : "Sync Live Rates"}
-            </span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => syncLivePrices()}
+                disabled={isSyncingPrices}
+                aria-busy={isSyncingPrices || undefined}
+                className="h-7 px-2.5 text-xs text-zinc-300 hover:text-white bg-surface-subtle border-surface-border hover:bg-surface-elevated"
+                aria-label="Sync real-time model rates"
+              >
+                <RefreshCw
+                  className={`w-3 h-3 mr-1.5 text-sky-400 ${isSyncingPrices ? "animate-spin motion-reduce:animate-none" : ""}`}
+                  aria-hidden="true"
+                />
+                <span className="font-mono text-[11px]">
+                  {isSyncingPrices
+                    ? "Syncing…"
+                    : lastSyncedAt
+                    ? `Live (${lastSyncedAt})`
+                    : "Sync Live Rates"}
+                </span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Fetch real-time model pricing from OpenRouter</TooltipContent>
+          </Tooltip>
 
           {/* Export Menu */}
           <DropdownMenu>

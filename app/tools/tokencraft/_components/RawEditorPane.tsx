@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { DotGrid } from "@/components/ui/dot-grid";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   Copy,
   Trash2,
@@ -171,47 +172,59 @@ export const RawEditorPane = React.memo(function RawEditorPane() {
             accept=".txt,.md,.json,.js,.ts,.tsx,.py,.html,.css"
             aria-label="Upload document file"
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
-            title="Upload File"
-            aria-label="Upload File"
-          >
-            <Upload className="w-3.5 h-3.5 mr-1 text-zinc-400" aria-hidden="true" />
-            <span>Upload</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
+                aria-label="Upload File"
+              >
+                <Upload className="w-3.5 h-3.5 mr-1 text-zinc-400" aria-hidden="true" />
+                <span>Upload</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Upload File</TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopy}
-            disabled={!rawText}
-            className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
-            title="Copy Text"
-            aria-label="Copy input text"
-          >
-            {copied ? (
-              <Check className="w-3.5 h-3.5 text-sky-400 mr-1" aria-hidden="true" />
-            ) : (
-              <Copy className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
-            )}
-            <span>{copied ? "Copied" : "Copy"}</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopy}
+                disabled={!rawText}
+                className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
+                aria-label="Copy input text"
+              >
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-sky-400 mr-1" aria-hidden="true" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
+                )}
+                <span>{copied ? "Copied" : "Copy"}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Copy Text</TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearText}
-            disabled={!rawText}
-            className="h-7 px-2 text-xs text-zinc-400 hover:text-rose-400 hover:bg-surface-elevated"
-            title="Clear Text"
-            aria-label="Clear input text"
-          >
-            <Trash2 className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
-            <span>Clear</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearText}
+                disabled={!rawText}
+                className="h-7 px-2 text-xs text-zinc-400 hover:text-rose-400 hover:bg-surface-elevated"
+                aria-label="Clear input text"
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
+                <span>Clear</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Clear Text</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 

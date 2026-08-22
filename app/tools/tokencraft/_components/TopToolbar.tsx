@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 import { Keycap } from "@/components/ui/keycap";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   Minimize2,
   ChevronDown,
@@ -175,17 +176,21 @@ export const TopToolbar = React.memo(function TopToolbar() {
 
         {/* Revert Minification Button (if available) */}
         {hasPreviousText && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={revertMinification}
-            className="gap-1.5 text-xs font-mono text-amber-400 border-amber-500/30 hover:bg-amber-500/10 h-8"
-            title="Revert to pre-minified prompt"
-            aria-label="Undo last minification"
-          >
-            <Undo2 className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Undo Minify</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={revertMinification}
+                className="gap-1.5 text-xs font-mono text-amber-400 border-amber-500/30 hover:bg-amber-500/10 h-8"
+                aria-label="Undo last minification"
+              >
+                <Undo2 className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Undo Minify</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Revert to pre-minified prompt</TooltipContent>
+          </Tooltip>
         )}
 
         {/* Minify Action - Clean Compiler Optimizer aesthetic */}

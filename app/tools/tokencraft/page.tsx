@@ -13,6 +13,7 @@ import { PromptDiffDialog } from "./_components/PromptDiffDialog";
 import { CommandPalette } from "./_components/CommandPalette";
 import { Keycap } from "@/components/ui/keycap";
 import { ShinyText } from "@/components/ui/shiny-text";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function TokenCraftPage() {
   // Mount the Web Worker tokenizer hook + global keyboard shortcuts
@@ -29,7 +30,8 @@ export default function TokenCraftPage() {
   }, [syncLivePrices]);
 
   return (
-    <div className="h-dvh bg-background text-zinc-100 flex flex-col relative overflow-hidden selection:bg-sky-500/20">
+    <TooltipProvider delayDuration={200}>
+      <div className="h-dvh bg-background text-zinc-100 flex flex-col relative overflow-hidden selection:bg-sky-500/20">
       {/* Skip link — first tab stop for keyboard users */}
       <a
         href="#workspace"
@@ -92,7 +94,8 @@ export default function TokenCraftPage() {
       {/* Global Modals & Dialogs */}
       <PromptDiffDialog />
       <CommandPalette />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
 

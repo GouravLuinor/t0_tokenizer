@@ -531,8 +531,9 @@ export function TokenInspectorPane() {
         </div>
       )}
 
-      {/* Completion announcer — single polite channel for tokenization results */}
-      <span className="sr-only" role="status" aria-live="polite">
+      {/* Completion announcer — single polite channel (role="status" implies
+          aria-live:polite) for tokenization results */}
+      <span className="sr-only" role="status">
         {!isProcessing && tokenCount > 0
           ? `Tokenized ${formatNumber(tokenCount)} tokens`
           : ""}

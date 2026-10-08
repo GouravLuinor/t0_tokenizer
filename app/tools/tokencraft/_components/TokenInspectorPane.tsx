@@ -507,7 +507,7 @@ export function TokenInspectorPane() {
           onClick={handleCopyTokenIds}
           disabled={tokenChunks.length === 0}
           className="h-6 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated ml-auto"
-          aria-label="Copy token IDs as JSON"
+          aria-label="Copy IDs as JSON"
         >
           {copiedIds ? (
             <Check className="w-3 h-3 text-sky-400 mr-1" aria-hidden="true" />

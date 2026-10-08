@@ -15,11 +15,13 @@
     "create:tool": "node ./scaffolder/bin/create-tier0.mjs"
   },
   "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.21",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
     "@radix-ui/react-slider": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.3",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "@supabase/supabase-js": "^2.117.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.4.7",
     "gpt-tokenizer": "^2.8.1",

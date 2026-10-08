@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "TokenCraft — BPE Tokenizer & Multi-Model Cost Engine",
+  title: "AI Tokenizer & Token Cost Calculator — TokenCraft",
   description:
-    "Zero-latency, in-browser BPE tokenization with real-time token boundary visualization, context-window safety gauges, multi-model cost projection, and prompt minification. 100% client-side.",
+    "Count tokens with exact OpenAI o200k and cl100k BPE encodings in your browser. See token boundaries, check context window usage, and price your prompt across 95 live models. 100% client-side, no cloud storage.",
   keywords: [
     "tokenizer",
     "BPE",
@@ -19,17 +19,17 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    title: "TokenCraft — BPE Tokenizer & Multi-Model Cost Engine",
+    title: "AI Tokenizer & Token Cost Calculator — TokenCraft",
     description:
-      "Inspect BPE token boundaries, hex encodings, and multi-model costs in real time. Fully client-side, zero cloud storage.",
+      "Inspect BPE token boundaries, context window usage, and multi-model costs in real time. Fully client-side, your text never leaves the browser.",
     url: "/tools/tokencraft",
-    siteName: "TokenCraft Studio",
+    siteName: "TokenCraft",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TokenCraft — BPE Tokenizer & Cost Engine",
+    title: "AI Tokenizer & Token Cost Calculator — TokenCraft",
     description:
-      "Real-time BPE tokenization and multi-model cost projection in your browser.",
+      "Exact o200k & cl100k token counting and multi-model cost projection, in your browser.",
   },
 };
 

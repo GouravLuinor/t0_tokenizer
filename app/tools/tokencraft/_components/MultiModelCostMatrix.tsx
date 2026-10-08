@@ -28,21 +28,15 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import { copyText } from "@/lib/clipboard";
-
-function escapeCsvField(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
-}
-
-function triggerBlobDownload(content: string, mimeType: string, filename: string) {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  // Release the blob reference — browsers keep object URLs alive until revoked
-  URL.revokeObjectURL(url);
-}
+import {
+  buildCsvReport,
+  buildJsonReport,
+  buildMarkdownReport,
+  triggerBlobDownload,
+} from "../_lib/reportExport";
+import { shouldPromptSignIn } from "../_lib/authGate";
+import { useAuth } from "../_hooks/useAuth";
+import { useAuthPromptStore } from "../_store/useAuthPromptStore";
 
 export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
   const tokenCount = useTokenCraftStore((s) => s.tokenCount);
@@ -58,6 +52,8 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
   const isSyncingPrices = useTokenCraftStore((s) => s.isSyncingPrices);
   const lastSyncedAt = useTokenCraftStore((s) => s.lastSyncedAt);
   const syncLivePrices = useTokenCraftStore((s) => s.syncLivePrices);
+  const { isAuthenticated } = useAuth();
+  const openAuthPrompt = useAuthPromptStore((s) => s.open);
 
   const [copiedReport, setCopiedReport] = useState(false);
   const [providerFilter, setProviderFilter] = useState<string>("All");
@@ -73,6 +69,14 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
 
   const estimatedOutputTokens = Math.round(tokenCount * outputMultiplier);
 
+  // Kept as a variable so the accessible name can contain the visible label
+  // verbatim — a mismatched aria-label fails label-content-name-mismatch.
+  const liveLabel = isSyncingPrices
+    ? "Syncing…"
+    : lastSyncedAt
+      ? `Live (${lastSyncedAt})`
+      : "Sync Live Rates";
+
   const allModels = Object.entries(modelsRegistry);
   const providers = ["All", ...Array.from(new Set(allModels.map(([, m]) => m.provider)))];
 
@@ -81,84 +85,51 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
       ? allModels
       : allModels.filter(([, m]) => m.provider === providerFilter);
 
-  // Export handlers
+  // Export handlers. Sign-in is *offered* on export but never required —
+  // the export always proceeds, dismissed prompt or not.
+  const reportParams = () => ({
+    tokenCount,
+    estimatedOutputTokens,
+    batchVolume,
+    outputMultiplier,
+    models: filteredModels,
+  });
+
+  const offerSignIn = () => {
+    if (
+      shouldPromptSignIn({
+        isAuthenticated,
+        trigger: "export",
+        sessionCount: 1,
+      })
+    ) {
+      openAuthPrompt("export");
+    }
+  };
+
   const handleCopyMarkdown = async () => {
-    let md = `### NorAI TokenCraft Cost & Multi-Model Analysis Report (2026)\n\n`;
-    md += `* **Prompt Input Tokens:** ${formatNumber(tokenCount)}\n`;
-    md += `* **Estimated Output Tokens (${outputMultiplier}x):** ${formatNumber(estimatedOutputTokens)}\n`;
-    md += `* **Batch Executions:** ${formatNumber(batchVolume)}\n\n`;
-    md += `| Model | Provider | Standard Input / 1M | Cached Input / 1M | Output / 1M | Single Run Total | Batch Total (${formatNumber(batchVolume)}) | Potential Savings |\n`;
-    md += `| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n`;
-
-    filteredModels.forEach(([, m]) => {
-      const singleInput = (tokenCount * m.inputCostPer1M) / 1000000;
-      const singleCached = (tokenCount * m.cachedInputCostPer1M) / 1000000;
-      const singleOutput = (estimatedOutputTokens * m.outputCostPer1M) / 1000000;
-
-      const singleTotal = singleInput + singleOutput;
-      const singleCachedTotal = singleCached + singleOutput;
-      const batchTotal = singleTotal * batchVolume;
-      const batchCachedTotal = singleCachedTotal * batchVolume;
-      const savings = Math.max(0, batchTotal - batchCachedTotal);
-
-      md += `| **${m.name}** | ${m.provider} | $${m.inputCostPer1M.toFixed(3)} | ${m.noCache ? "—" : `$${m.cachedInputCostPer1M.toFixed(3)}`} | $${m.outputCostPer1M.toFixed(3)} | ${formatCurrency(singleTotal, 5)} | ${formatCurrency(batchTotal, 2)} | ${savings > 0 ? `Save ${formatCurrency(savings, 2)}` : "$0.00"} |\n`;
-    });
-
-    await copyText(md);
+    offerSignIn();
+    await copyText(buildMarkdownReport(reportParams()));
     setCopiedReport(true);
     setTimeout(() => setCopiedReport(false), 2000);
   };
 
   const handleDownloadJSON = () => {
-    const reportData = {
-      timestamp: new Date().toISOString(),
-      promptTokens: tokenCount,
-      estimatedOutputTokens,
-      batchVolume,
-      models: filteredModels.map(([, m]) => {
-        const singleInput = (tokenCount * m.inputCostPer1M) / 1000000;
-        const singleCached = (tokenCount * m.cachedInputCostPer1M) / 1000000;
-        const singleOutput = (estimatedOutputTokens * m.outputCostPer1M) / 1000000;
-        return {
-          modelId: m.id,
-          name: m.name,
-          provider: m.provider,
-          standardInputCost1M: m.inputCostPer1M,
-          cachedInputCost1M: m.cachedInputCostPer1M,
-          noCacheTier: Boolean(m.noCache),
-          tieredPricing: Boolean(m.tieredPricing),
-          tieredAboveTokens: m.tieredAboveTokens ?? null,
-          outputCost1M: m.outputCostPer1M,
-          singleRunTotalUSD: singleInput + singleOutput,
-          singleRunCachedUSD: singleCached + singleOutput,
-          batchTotalUSD: (singleInput + singleOutput) * batchVolume,
-          batchCachedUSD: (singleCached + singleOutput) * batchVolume,
-        };
-      }),
-    };
-
+    offerSignIn();
     triggerBlobDownload(
-      JSON.stringify(reportData, null, 2),
+      JSON.stringify(buildJsonReport(reportParams()), null, 2),
       "application/json",
       `tokencraft-cost-report-${Date.now()}.json`
     );
   };
 
   const handleDownloadCSV = () => {
-    let csv = `Model,Provider,Family,Standard Input 1M,Cached Input 1M,Output 1M,Single Run Total USD,Batch Total (${batchVolume}) USD,Batch Cached USD,Potential Savings USD,No Cache Tier,Tiered Pricing\n`;
-    filteredModels.forEach(([, m]) => {
-      const singleInput = (tokenCount * m.inputCostPer1M) / 1000000;
-      const singleCached = (tokenCount * m.cachedInputCostPer1M) / 1000000;
-      const singleOutput = (estimatedOutputTokens * m.outputCostPer1M) / 1000000;
-      const singleTotal = singleInput + singleOutput;
-      const batchTotal = singleTotal * batchVolume;
-      const batchCached = (singleCached + singleOutput) * batchVolume;
-      const savings = Math.max(0, batchTotal - batchCached);
-
-      csv += `${escapeCsvField(m.name)},${escapeCsvField(m.provider)},${escapeCsvField(m.family)},${m.inputCostPer1M},${m.cachedInputCostPer1M},${m.outputCostPer1M},${singleTotal.toFixed(6)},${batchTotal.toFixed(4)},${batchCached.toFixed(4)},${savings.toFixed(4)},${m.noCache ? "yes" : "no"},${m.tieredPricing ? "yes" : "no"}\n`;
-    });
-
-    triggerBlobDownload(csv, "text/csv", `tokencraft-pricing-${Date.now()}.csv`);
+    offerSignIn();
+    triggerBlobDownload(
+      buildCsvReport(reportParams()),
+      "text/csv",
+      `tokencraft-pricing-${Date.now()}.csv`
+    );
   };
 
   return (
@@ -188,19 +159,13 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
                 disabled={isSyncingPrices}
                 aria-busy={isSyncingPrices || undefined}
                 className="h-7 px-2.5 text-xs text-zinc-300 hover:text-white bg-surface-subtle border-surface-border hover:bg-surface-elevated"
-                aria-label="Sync real-time model rates"
+                aria-label={`${liveLabel} — sync real-time model rates from OpenRouter`}
               >
                 <RefreshCw
                   className={`w-3 h-3 mr-1.5 text-sky-400 ${isSyncingPrices ? "animate-spin motion-reduce:animate-none" : ""}`}
                   aria-hidden="true"
                 />
-                <span className="font-mono text-[11px]">
-                  {isSyncingPrices
-                    ? "Syncing…"
-                    : lastSyncedAt
-                    ? `Live (${lastSyncedAt})`
-                    : "Sync Live Rates"}
-                </span>
+                <span className="font-mono text-[11px]">{liveLabel}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>Fetch real-time model pricing from OpenRouter</TooltipContent>
@@ -286,7 +251,7 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
                 key={step}
                 onClick={() => setBatchVolume(step)}
                 aria-pressed={batchVolume === step}
-                aria-label={`Set batch volume to ${formatNumber(step)}`}
+                aria-label={`${step >= 1000 ? `${step / 1000}k` : step} — set batch volume to ${formatNumber(step)} calls`}
                 className={`hover:text-zinc-200 transition-colors duration-150 tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 rounded ${
                   batchVolume === step ? "text-sky-400 font-bold" : ""
                 }`}
@@ -314,7 +279,7 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
                 key={opt.value}
                 onClick={() => setOutputMultiplier(opt.value)}
                 aria-pressed={outputMultiplier === opt.value}
-                aria-label={`Set output token ratio to ${opt.label}`}
+                aria-label={`${opt.value}x — set output token ratio to ${opt.label}`}
                 className={`py-1 rounded text-[10px] font-mono transition-all duration-150 text-center tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60 ${
                   outputMultiplier === opt.value
                     ? "bg-zinc-100 text-zinc-950 font-semibold shadow-sm"

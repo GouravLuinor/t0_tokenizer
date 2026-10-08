@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 import { Keycap } from "@/components/ui/keycap";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
@@ -49,29 +48,8 @@ export const TopToolbar = React.memo(function TopToolbar() {
   const currentModel = getCurrentModel(modelsRegistry, selectedModel);
 
   return (
-    <header className="shrink-0 flex flex-wrap items-center justify-between gap-4 p-3.5 border border-surface-border bg-surface-subtle/80 backdrop-blur-md rounded-xl glass-edge-subtle">
-      {/* Brand & App Identifier */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-surface-default border border-surface-border text-sky-400 font-mono font-extrabold text-sm tracking-tight shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] select-none">
-          TC
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <AnimatedGradientText
-              fromColor="#38BDF8"
-              toColor="#06B6D4"
-              className="text-sm font-semibold tracking-tight"
-            >
-              TokenCraft
-            </AnimatedGradientText>
-          </div>
-          <p className="text-xs text-zinc-400 font-mono">
-            BPE Tokenizer & Multi-Model Cost Engine
-          </p>
-        </div>
-      </div>
-
-      {/* Control Actions */}
+    <header className="flex flex-wrap items-center justify-start gap-3 rounded-xl border border-white/10 bg-surface-subtle/40 p-3">
+      {/* Control Actions — brand identity lives in the SiteHeader */}
       <div className="flex flex-wrap items-center gap-2">
         {/* Command Palette Trigger */}
         <Button
@@ -79,7 +57,6 @@ export const TopToolbar = React.memo(function TopToolbar() {
           size="sm"
           onClick={() => setCommandPaletteOpen(true)}
           className="gap-2 bg-surface-default border-surface-border text-xs text-zinc-300 hover:text-zinc-100 hover:border-surface-borderHover h-8"
-          aria-label="Open Command Palette (Cmd+K)"
         >
           <Command className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
           <span className="hidden sm:inline font-mono text-xs">Commands</span>
@@ -96,10 +73,10 @@ export const TopToolbar = React.memo(function TopToolbar() {
               variant="outline"
               size="sm"
               className="gap-2 bg-surface-default border-surface-border font-mono text-xs text-zinc-200 hover:text-white hover:border-surface-borderHover h-8"
-              aria-label={`Select Tokenizer Model, currently ${currentModel.name}`}
+              aria-label={`${currentModel.name} ${currentModel.badgeText} — select tokenizer model`}
             >
               <Cpu className="w-3.5 h-3.5 text-sky-400" aria-hidden="true" />
-              <span>{currentModel.name}</span>
+              <span>{currentModel.name}</span>{" "}
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-elevated text-zinc-300 border border-surface-border">
                 {currentModel.badgeText}
               </span>
@@ -147,7 +124,7 @@ export const TopToolbar = React.memo(function TopToolbar() {
               variant="outline"
               size="sm"
               className="gap-2 bg-surface-default border-surface-border text-xs text-zinc-300 hover:text-white h-8"
-              aria-label="Load preset prompts"
+              aria-label="Presets — load sample prompts"
             >
               <Bookmark className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
               <span className="font-mono">Presets</span>

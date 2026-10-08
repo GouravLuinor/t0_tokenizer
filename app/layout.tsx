@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: "TokenCraft & Context Optimizer | NorAI Tier-0 Flagship",
   description:
-    "Zero-latency, in-browser multi-model BPE tokenization, real-time context safety inspection, dynamic cost projection, and prompt minification.",
+    "In-browser BPE tokenization with exact o200k and cl100k token boundaries, real-time context window inspection, multi-model cost projection, and prompt minification. Your text never leaves your device.",
   keywords: [
     "tokenizer",
     "BPE",

@@ -1,38 +1,37 @@
-"use client";
-
-import React, { useEffect } from "react";
-import { useTokenizer } from "./_hooks/useTokenizer";
-import { useGlobalShortcuts } from "./_hooks/useGlobalShortcuts";
-import { useTokenCraftStore } from "./_store/useTokenCraftStore";
-import { TopToolbar } from "./_components/TopToolbar";
-import { RawEditorPane } from "./_components/RawEditorPane";
-import { TokenInspectorPane } from "./_components/TokenInspectorPane";
-import { ContextSafetyGauge } from "./_components/ContextSafetyGauge";
-import { MultiModelCostMatrix } from "./_components/MultiModelCostMatrix";
-import { PromptDiffDialog } from "./_components/PromptDiffDialog";
-import { CommandPalette } from "./_components/CommandPalette";
-import { Keycap } from "@/components/ui/keycap";
-import { ShinyText } from "@/components/ui/shiny-text";
+import { Cpu, ShieldCheck, Lock } from "lucide-react";
+import { SiteHeader } from "./_components/SiteHeader";
+import { Workstation } from "./_components/Workstation";
+import { WorkloadSection } from "./_components/WorkloadSection";
+import { KnowledgeHub } from "./_components/KnowledgeHub";
+import { FaqSection } from "./_components/FaqSection";
+import { StudioFooter } from "./_components/StudioFooter";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+const TRUST_BADGES = [
+  {
+    icon: ShieldCheck,
+    label: "No cloud storage",
+    detail: "Your prompts never leave the browser",
+    className: "border-emerald-500/20 text-emerald-300/90",
+  },
+  {
+    icon: Cpu,
+    label: "Client-side BPE",
+    detail: "Exact o200k & cl100k token boundaries",
+    className: "border-sky-500/20 text-sky-300/90",
+  },
+  {
+    icon: Lock,
+    label: "No account required",
+    detail: "Free forever, no paywall, no ads",
+    className: "border-white/10 text-zinc-300/90",
+  },
+] as const;
+
 export default function TokenCraftPage() {
-  // Mount the Web Worker tokenizer hook + global keyboard shortcuts
-  useTokenizer();
-  useGlobalShortcuts();
-
-  const syncLivePrices = useTokenCraftStore((s) => s.syncLivePrices);
-
-  useEffect(() => {
-    // Restore persisted workspace (text, model, view prefs) after mount —
-    // the tokenizer hook then re-derives token data from the restored text
-    void useTokenCraftStore.persist.rehydrate();
-    syncLivePrices();
-  }, [syncLivePrices]);
-
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="h-dvh bg-background text-zinc-100 flex flex-col relative overflow-hidden selection:bg-sky-500/20">
-      {/* Skip link — first tab stop for keyboard users */}
+      <div className="min-h-dvh bg-background text-zinc-100 selection:bg-sky-500/20">
       <a
         href="#workspace"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[80] focus:px-3 focus:py-1.5 focus:rounded-lg focus:bg-zinc-100 focus:text-zinc-950 focus:text-xs focus:font-mono focus:shadow-elevated"
@@ -40,62 +39,61 @@ export default function TokenCraftPage() {
         Skip to workspace
       </a>
 
-      {/* Ambient glow — full bleed */}
-      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-[radial-gradient(ellipse_50%_100%_at_50%_0%,rgba(56,189,248,0.06),transparent)]" />
+      <SiteHeader />
 
-      <main className="relative z-10 flex-1 min-h-0 w-full p-4 md:p-6 lg:p-8 xl:px-10 flex flex-col gap-6 overflow-y-auto">
-        {/* Top Control Toolbar */}
-        <TopToolbar />
-
-        {/* Primary Split-Pane Workspace: Left (Editor) vs Right (Token Inspector) — absorbs all spare viewport height */}
+      <main id="main" className="relative w-full">
+        {/* Section 1 — Hero Workstation */}
         <section
-          id="workspace"
-          aria-label="Interactive Workspace"
-          className="flex-1 min-h-[440px] grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)] gap-6"
+          aria-label="Token Crafting Workstation"
+          className="mx-auto w-full max-w-6xl px-4 pt-12 pb-16 md:px-6 md:pt-16 lg:px-8"
         >
-          <RawEditorPane />
-          <TokenInspectorPane />
+          <header className="mb-10 md:mb-12 max-w-3xl">
+            <h1 className="text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl">
+              AI Tokenizer &amp; Token Cost Calculator
+            </h1>
+            <p className="mt-4 text-base leading-relaxed text-zinc-400 sm:text-lg">
+              Count tokens with the exact OpenAI BPE encodings, see where every
+              token boundary falls, and price your prompt across{" "}
+              <span className="text-zinc-200">95 live models</span> — all
+              computed in your browser.
+            </p>
+
+            <ul className="mt-7 flex flex-wrap gap-3">
+              {TRUST_BADGES.map(({ icon: Icon, label, detail, className }) => (
+                <li
+                  key={label}
+                  className={`flex items-center gap-2.5 rounded-xl border bg-surface-subtle/40 px-3.5 py-2.5 ${className}`}
+                >
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="flex flex-col">
+                    <span className="text-sm font-medium leading-tight">
+                      {label}
+                    </span>
+                    <span className="text-xs font-normal leading-tight text-zinc-400">
+                      {detail}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </header>
+
+          <Workstation />
         </section>
 
-        {/* Secondary Analytics Row: Context Safety Gauge + Multi-Model Cost Matrix */}
-        <section aria-label="Context and Cost Analytics" className="shrink-0 grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[minmax(0,1fr)] lg:h-[360px] lg:min-h-0 gap-6">
-          <div className="lg:col-span-1 lg:min-h-0">
-            <ContextSafetyGauge />
-          </div>
-          <div className="lg:col-span-2 lg:min-h-0">
-            <MultiModelCostMatrix />
-          </div>
-        </section>
+        {/* Section 2 — Workload Budget Calculator */}
+        <WorkloadSection />
 
-        {/* Studio-Grade Footer */}
-        <footer className="shrink-0 flex flex-wrap items-center justify-between gap-4 py-4 px-1 border-t border-surface-border text-xs font-mono text-zinc-400">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
-            <span className="text-zinc-300 font-medium">TokenCraft Studio</span>
-            <span className="text-zinc-500">•</span>
-            <span className="text-zinc-400">BPE Tokenizer & Multi-Model Cost Engine</span>
-          </div>
-          <div className="flex items-center gap-3 text-zinc-400">
-            <div className="flex items-center gap-1">
-              <Keycap size="xs">⌘</Keycap>
-              <Keycap size="xs">K</Keycap>
-              <span className="ml-1 text-zinc-400">Commands</span>
-            </div>
-            <span aria-hidden="true" className="text-zinc-600">•</span>
-            <ShinyText shineColor="cyan" className="text-[11px] text-sky-400 font-medium">
-              100% Client-Side Local Compute
-            </ShinyText>
-            <span aria-hidden="true" className="text-zinc-600">•</span>
-            <span className="text-zinc-400">Zero Cloud Storage</span>
-          </div>
-        </footer>
+        {/* Section 3 — Knowledge Hub */}
+        <KnowledgeHub />
+
+        {/* Section 4 — FAQ */}
+        <FaqSection />
       </main>
 
-      {/* Global Modals & Dialogs */}
-      <PromptDiffDialog />
-      <CommandPalette />
+      {/* Section 5 — Studio Footer */}
+      <StudioFooter />
       </div>
     </TooltipProvider>
   );
 }
-

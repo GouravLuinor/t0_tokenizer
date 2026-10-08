@@ -65,8 +65,24 @@ const config: Config = {
         "border-beam": "borderBeam 8s linear infinite",
         "shine": "shine 4s ease-in-out infinite",
         "pulse-subtle": "pulseSubtle 2.5s ease-in-out infinite",
+        "accordion-down": "accordionDown 220ms ease-out-expo",
+        "accordion-up": "accordionUp 200ms ease-out-expo",
       },
       keyframes: {
+        accordionDown: {
+          from: { height: "0", opacity: "0" },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+            opacity: "1",
+          },
+        },
+        accordionUp: {
+          from: {
+            height: "var(--radix-accordion-content-height)",
+            opacity: "1",
+          },
+          to: { height: "0", opacity: "0" },
+        },
         gradientFlow: {
           "0%, 100%": { "background-position": "0% 50%", "background-size": "200% 200%" },
           "50%": { "background-position": "100% 50%", "background-size": "200% 200%" },

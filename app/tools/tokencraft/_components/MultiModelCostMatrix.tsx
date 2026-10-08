@@ -101,7 +101,7 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
       const batchCachedTotal = singleCachedTotal * batchVolume;
       const savings = Math.max(0, batchTotal - batchCachedTotal);
 
-      md += `| **${m.name}** | ${m.provider} | $${m.inputCostPer1M.toFixed(3)} | $${m.cachedInputCostPer1M.toFixed(3)} | $${m.outputCostPer1M.toFixed(3)} | ${formatCurrency(singleTotal, 5)} | ${formatCurrency(batchTotal, 2)} | ${savings > 0 ? `Save ${formatCurrency(savings, 2)}` : "$0.00"} |\n`;
+      md += `| **${m.name}** | ${m.provider} | $${m.inputCostPer1M.toFixed(3)} | ${m.noCache ? "—" : `$${m.cachedInputCostPer1M.toFixed(3)}`} | $${m.outputCostPer1M.toFixed(3)} | ${formatCurrency(singleTotal, 5)} | ${formatCurrency(batchTotal, 2)} | ${savings > 0 ? `Save ${formatCurrency(savings, 2)}` : "$0.00"} |\n`;
     });
 
     await copyText(md);
@@ -125,6 +125,9 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
           provider: m.provider,
           standardInputCost1M: m.inputCostPer1M,
           cachedInputCost1M: m.cachedInputCostPer1M,
+          noCacheTier: Boolean(m.noCache),
+          tieredPricing: Boolean(m.tieredPricing),
+          tieredAboveTokens: m.tieredAboveTokens ?? null,
           outputCost1M: m.outputCostPer1M,
           singleRunTotalUSD: singleInput + singleOutput,
           singleRunCachedUSD: singleCached + singleOutput,
@@ -142,7 +145,7 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
   };
 
   const handleDownloadCSV = () => {
-    let csv = `Model,Provider,Family,Standard Input 1M,Cached Input 1M,Output 1M,Single Run Total USD,Batch Total (${batchVolume}) USD,Batch Cached USD,Potential Savings USD\n`;
+    let csv = `Model,Provider,Family,Standard Input 1M,Cached Input 1M,Output 1M,Single Run Total USD,Batch Total (${batchVolume}) USD,Batch Cached USD,Potential Savings USD,No Cache Tier,Tiered Pricing\n`;
     filteredModels.forEach(([, m]) => {
       const singleInput = (tokenCount * m.inputCostPer1M) / 1000000;
       const singleCached = (tokenCount * m.cachedInputCostPer1M) / 1000000;
@@ -152,7 +155,7 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
       const batchCached = (singleCached + singleOutput) * batchVolume;
       const savings = Math.max(0, batchTotal - batchCached);
 
-      csv += `${escapeCsvField(m.name)},${escapeCsvField(m.provider)},${escapeCsvField(m.family)},${m.inputCostPer1M},${m.cachedInputCostPer1M},${m.outputCostPer1M},${singleTotal.toFixed(6)},${batchTotal.toFixed(4)},${batchCached.toFixed(4)},${savings.toFixed(4)}\n`;
+      csv += `${escapeCsvField(m.name)},${escapeCsvField(m.provider)},${escapeCsvField(m.family)},${m.inputCostPer1M},${m.cachedInputCostPer1M},${m.outputCostPer1M},${singleTotal.toFixed(6)},${batchTotal.toFixed(4)},${batchCached.toFixed(4)},${savings.toFixed(4)},${m.noCache ? "yes" : "no"},${m.tieredPricing ? "yes" : "no"}\n`;
     });
 
     triggerBlobDownload(csv, "text/csv", `tokencraft-pricing-${Date.now()}.csv`);
@@ -423,6 +426,18 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
                           ACTIVE
                         </span>
                       )}
+                      {model.tieredPricing && (
+                        <span
+                          title={
+                            model.tieredAboveTokens
+                              ? `Higher rates apply above ${formatNumber(model.tieredAboveTokens)} prompt tokens`
+                              : "Conditional tiered pricing applies at long context"
+                          }
+                          className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold cursor-help"
+                        >
+                          TIERS
+                        </span>
+                      )}
                     </div>
                     <span className="text-[10px] text-zinc-400">
                       {model.provider} • {model.family}
@@ -441,14 +456,23 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
 
                   {/* Cached Cost & Savings Badge */}
                   <td className="py-3 px-3 tabular-nums">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sky-400 font-medium">
-                        ${model.cachedInputCostPer1M.toFixed(3)} / 1M
+                    {model.noCache ? (
+                      <span
+                        className="text-zinc-500"
+                        title="No prompt-cache pricing tier for this model"
+                      >
+                        —
                       </span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
-                        -{savingsPercent}%
-                      </span>
-                    </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sky-400 font-medium">
+                          ${model.cachedInputCostPer1M.toFixed(3)} / 1M
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
+                          -{savingsPercent}%
+                        </span>
+                      </div>
+                    )}
                   </td>
 
                   {/* Single Run Cost */}

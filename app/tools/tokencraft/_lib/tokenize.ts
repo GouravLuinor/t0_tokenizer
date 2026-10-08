@@ -7,33 +7,13 @@ import {
   decode as decode4,
 } from "gpt-tokenizer/model/gpt-4";
 
-export interface TokenChunk {
-  index: number;
-  id: number;
-  text: string;
-  byteLength: number;
-  /** Precomputed lowercase haystack for client-side filtering */
-  search: string;
-}
+import type {
+  TokenChunk,
+  TokenizeStats,
+  TokenizerEncoding,
+} from "./tokenizeTypes";
 
-export interface TokenizeRequest {
-  id: number;
-  text: string;
-  model: string;
-}
-
-export interface TokenizeStats {
-  tokens: TokenChunk[];
-  count: number;
-  characterCount: number;
-  wordCount: number;
-  byteCount: number;
-  executionTimeMs: number;
-}
-
-export interface TokenizeResponse extends TokenizeStats {
-  id: number;
-}
+export * from "./tokenizeTypes";
 
 export function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
@@ -42,15 +22,18 @@ export function countWords(text: string): number {
 /**
  * Pure tokenization core shared by the Web Worker and the
  * main-thread fallback path.
+ *
+ * `encoding` is supplied by the caller from the active model's registry
+ * entry — never inferred from display strings — so the cl100k_base path is
+ * genuinely reachable (legacy GPT-3.5/GPT-4 models).
  */
 export function tokenizeText(
   text: string,
-  model: string
+  encoding: TokenizerEncoding
 ): TokenizeStats {
   const startTime = performance.now();
 
-  const isLegacy =
-    model === "gpt-4" || model === "gpt-3.5-turbo" || model === "cl100k_base";
+  const isLegacy = encoding === "cl100k_base";
   const encodeFn = isLegacy ? encode4 : encode4o;
   const decodeFn = isLegacy ? decode4 : decode4o;
 
@@ -82,7 +65,7 @@ export function tokenizeText(
 /** Safe variant for the main-thread fallback: never throws. */
 export function tokenizeTextSafe(
   text: string,
-  model: string
+  encoding: TokenizerEncoding
 ): TokenizeStats | null {
   try {
     if (!text) {
@@ -95,43 +78,8 @@ export function tokenizeTextSafe(
         executionTimeMs: 0,
       };
     }
-    return tokenizeText(text, model);
+    return tokenizeText(text, encoding);
   } catch {
     return null;
   }
-}
-
-/**
- * Wire-format → store-schema patch. The worker protocol says {tokens, count};
- * the store schema says {tokenChunks, tokenCount}. Spreading one into the
- * other silently writes phantom keys, so every application MUST go through
- * this explicit mapping (guarded by unit tests).
- */
-export const TOKEN_STATS_STORE_FIELDS = [
-  "tokenChunks",
-  "tokenCount",
-  "characterCount",
-  "wordCount",
-  "byteCount",
-  "executionTimeMs",
-] as const;
-
-export function mapStatsToStorePatch(
-  stats: TokenizeStats
-): {
-  tokenChunks: TokenChunk[];
-  tokenCount: number;
-  characterCount: number;
-  wordCount: number;
-  byteCount: number;
-  executionTimeMs: number;
-} {
-  return {
-    tokenChunks: stats.tokens,
-    tokenCount: stats.count,
-    characterCount: stats.characterCount,
-    wordCount: stats.wordCount,
-    byteCount: stats.byteCount,
-    executionTimeMs: stats.executionTimeMs,
-  };
 }

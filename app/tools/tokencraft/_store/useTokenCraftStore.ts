@@ -6,7 +6,7 @@ import {
   type MinifyOptions,
   type MinifyResult,
 } from "../_lib/promptMinifier";
-import type { TokenChunk } from "../_lib/tokenize";
+import type { TokenChunk } from "../_lib/tokenizeTypes";
 import { PROMPT_PRESETS, DEFAULT_PRESET_KEY } from "../_lib/presets";
 import {
   INITIAL_MODEL_REGISTRY,
@@ -170,8 +170,19 @@ export const useTokenCraftStore = create<TokenCraftState>()(
 }),
     {
       name: "tokencraft-workspace",
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorage),
+      // The model catalog is regenerated from OpenRouter (scripts/sync-models.mjs);
+      // a persisted key may no longer exist after a catalog swap (e.g. the dead
+      // qwen3.8-max id). Reset to the default instead of rendering a stale model.
+      migrate: (persistedState) => {
+        const state = (persistedState ?? {}) as Partial<PersistedWorkspace>;
+        const selectedModel =
+          state.selectedModel && state.selectedModel in INITIAL_MODEL_REGISTRY
+            ? state.selectedModel
+            : "claude-sonnet-5";
+        return { ...(state as PersistedWorkspace), selectedModel };
+      },
       // Persist the user's work and preferences only — never derived
       // tokenization state (recomputed by the worker on rehydrate)
       partialize: (s) => ({

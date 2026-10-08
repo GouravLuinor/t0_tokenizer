@@ -5,6 +5,7 @@ export const FALLBACK_MODEL: ModelPricing = {
   name: "Claude Sonnet 5",
   provider: "Anthropic",
   family: "Claude BPE",
+  encoding: "o200k_base",
   contextWindow: 1000000,
   inputCostPer1M: 2.0,
   cachedInputCostPer1M: 0.2,

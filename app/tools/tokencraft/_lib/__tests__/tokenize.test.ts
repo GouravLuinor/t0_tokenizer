@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
-import {
-  tokenizeTextSafe,
-  countWords,
-  mapStatsToStorePatch,
-} from "../tokenize";
+import { tokenizeTextSafe, countWords } from "../tokenize";
+import { mapStatsToStorePatch } from "../tokenizeTypes";
 import {
   formatNumber,
   formatCurrency,
@@ -12,7 +9,7 @@ import {
 
 describe("tokenizeTextSafe", () => {
   it("returns an empty result for empty input", () => {
-    const stats = tokenizeTextSafe("", "gpt-4o");
+    const stats = tokenizeTextSafe("", "o200k_base");
     expect(stats).not.toBeNull();
     expect(stats!.count).toBe(0);
     expect(stats!.tokens).toHaveLength(0);
@@ -20,7 +17,7 @@ describe("tokenizeTextSafe", () => {
 
   it("produces consistent counts for simple text", () => {
     const text = "Hello, world! This is a tokenizer test.";
-    const stats = tokenizeTextSafe(text, "claude-sonnet-5");
+    const stats = tokenizeTextSafe(text, "o200k_base");
     expect(stats).not.toBeNull();
     expect(stats!.count).toBe(stats!.tokens.length);
     expect(stats!.characterCount).toBe(text.length);
@@ -30,7 +27,7 @@ describe("tokenizeTextSafe", () => {
 
   it("handles multi-byte unicode and emoji without crashing", () => {
     const text = "héllo 世界 🚀🎉";
-    const stats = tokenizeTextSafe(text, "gpt-4o");
+    const stats = tokenizeTextSafe(text, "o200k_base");
     expect(stats).not.toBeNull();
     expect(stats!.count).toBeGreaterThan(0);
     // UTF-8 byte length must exceed JS string length here
@@ -38,7 +35,7 @@ describe("tokenizeTextSafe", () => {
   });
 
   it("assigns sequential indices to chunks", () => {
-    const stats = tokenizeTextSafe("one two three four five", "gpt-4o");
+    const stats = tokenizeTextSafe("one two three four five", "o200k_base");
     expect(stats).not.toBeNull();
     stats!.tokens.forEach((chunk, i) => {
       expect(chunk.index).toBe(i);
@@ -46,9 +43,33 @@ describe("tokenizeTextSafe", () => {
   });
 
   it("precomputes a lowercase search haystack containing id and text", () => {
-    const stats = tokenizeTextSafe("Hello", "gpt-4o");
+    const stats = tokenizeTextSafe("Hello", "o200k_base");
     const first = stats!.tokens[0];
     expect(first.search).toBe(`${first.text} #${first.id}`.toLowerCase());
+  });
+});
+
+describe("encoding selection", () => {
+  const sample = "The quick brown fox jumps over the lazy dog. 🚀";
+
+  it("genuinely runs two different BPE vocabularies", () => {
+    // Regression guard: the cl100k path used to be unreachable because
+    // callers passed registry keys and the check compared literal names.
+    const o200k = tokenizeTextSafe(sample, "o200k_base");
+    const cl100k = tokenizeTextSafe(sample, "cl100k_base");
+    expect(o200k).not.toBeNull();
+    expect(cl100k).not.toBeNull();
+    // The vocabularies split this sentence differently (12 vs 13 tokens),
+    // proving each encoder is actually wired up.
+    expect(o200k!.count).toBe(12);
+    expect(cl100k!.count).toBe(13);
+  });
+
+  it("returns identical results when called twice with the same encoding", () => {
+    const a = tokenizeTextSafe(sample, "cl100k_base");
+    const b = tokenizeTextSafe(sample, "cl100k_base");
+    expect(a!.count).toBe(b!.count);
+    expect(a!.tokens.map((t) => t.id)).toEqual(b!.tokens.map((t) => t.id));
   });
 });
 

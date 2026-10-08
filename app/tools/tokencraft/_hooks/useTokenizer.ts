@@ -1,18 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useTokenCraftStore } from "../_store/useTokenCraftStore";
 import type {
   TokenizeRequest,
   TokenizeResponse,
   TokenizeStats,
-} from "../_lib/tokenize";
-import { mapStatsToStorePatch } from "../_lib/tokenize";
+} from "../_lib/tokenizeTypes";
+import { mapStatsToStorePatch } from "../_lib/tokenizeTypes";
+import { getCurrentModel } from "../_lib/modelRegistry";
 
 /**
  * Owns the tokenization pipeline: debounced dispatch to the Web Worker,
  * stale-response rejection via monotonic request ids, and a transparent
  * main-thread fallback when Worker construction or runtime fails.
+ *
+ * This module deliberately imports NOTHING from _lib/tokenize: the page mount
+ * path must stay free of the gpt-tokenizer BPE rank tables. tokenize.ts is
+ * reached only through the worker asset or the lazy dynamic import below.
  */
 export function useTokenizer() {
   const rawText = useTokenCraftStore((s) => s.rawText);
@@ -23,6 +28,44 @@ export function useTokenizer() {
   const workerRef = useRef<Worker | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestRequestIdRef = useRef(0);
+
+  /**
+   * Wire format ({tokens, count}) is translated to the store schema
+   * ({tokenChunks, tokenCount}) by mapStatsToStorePatch — never spread the
+   * response directly into setTokenData.
+   */
+  const applyStats = useCallback(
+    (stats: TokenizeStats) => {
+      setTokenData({ ...mapStatsToStorePatch(stats), isProcessing: false });
+    },
+    [setTokenData]
+  );
+
+  /** Main-thread fallback for environments without Web Workers. */
+  const runInline = useCallback(
+    async (
+      text: string,
+      encoding: TokenizeRequest["encoding"],
+      requestId?: number
+    ) => {
+      setTokenData({ isProcessing: true });
+      try {
+        // Dynamic import keeps gpt-tokenizer out of the main bundle unless needed
+        const { tokenizeTextSafe } = await import("../_lib/tokenize");
+        const stats = tokenizeTextSafe(text, encoding);
+        if (requestId !== undefined && requestId !== latestRequestIdRef.current)
+          return;
+        if (stats) {
+          applyStats(stats);
+        } else {
+          setTokenData({ isProcessing: false });
+        }
+      } catch {
+        setTokenData({ isProcessing: false });
+      }
+    },
+    [applyStats, setTokenData]
+  );
 
   // Create the worker once; on any failure, fall back to inline computation.
   useEffect(() => {
@@ -42,9 +85,10 @@ export function useTokenizer() {
         worker.terminate();
         workerRef.current = null;
         setWorkerDegraded(true);
+        const state = useTokenCraftStore.getState();
         runInline(
-          useTokenCraftStore.getState().rawText,
-          useTokenCraftStore.getState().selectedModel
+          state.rawText,
+          getCurrentModel(state.modelsRegistry, state.selectedModel).encoding
         );
       };
 
@@ -60,8 +104,7 @@ export function useTokenizer() {
       workerRef.current?.terminate();
       workerRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [applyStats, runInline, setWorkerDegraded]);
 
   // Debounced dispatch on input changes
   useEffect(() => {
@@ -74,49 +117,25 @@ export function useTokenizer() {
       // Enter processing state only when real work is dispatched
       // (prevents "Computing…" shimmer flicker between keystrokes)
       const requestId = ++latestRequestIdRef.current;
+      const encoding = getCurrentModel(
+        useTokenCraftStore.getState().modelsRegistry,
+        selectedModel
+      ).encoding;
 
       if (workerRef.current) {
         const payload: TokenizeRequest = {
           id: requestId,
           text: rawText,
-          model: selectedModel,
+          encoding,
         };
         workerRef.current.postMessage(payload);
       } else {
-        runInline(rawText, selectedModel, requestId);
+        runInline(rawText, encoding, requestId);
       }
     }, delay);
 
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
-  }, [rawText, selectedModel]);
-
-  /**
-   * Wire format ({tokens, count}) is translated to the store schema
-   * ({tokenChunks, tokenCount}) by mapStatsToStorePatch — never spread the
-   * response directly into setTokenData.
-   */
-  function applyStats(stats: TokenizeStats) {
-    setTokenData({ ...mapStatsToStorePatch(stats), isProcessing: false });
-  }
-
-  /** Main-thread fallback for environments without Web Workers. */
-  async function runInline(text: string, model: string, requestId?: number) {
-    setTokenData({ isProcessing: true });
-    try {
-      // Dynamic import keeps gpt-tokenizer out of the main bundle unless needed
-      const { tokenizeTextSafe } = await import("../_lib/tokenize");
-      const stats = tokenizeTextSafe(text, model);
-      if (requestId !== undefined && requestId !== latestRequestIdRef.current)
-        return;
-      if (stats) {
-        applyStats(stats);
-      } else {
-        setTokenData({ isProcessing: false });
-      }
-    } catch {
-      setTokenData({ isProcessing: false });
-    }
-  }
+  }, [rawText, selectedModel, runInline]);
 }

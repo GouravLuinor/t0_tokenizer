@@ -1,3 +1,11 @@
+import {
+  CATALOG_GENERATED_AT,
+  GENERATED_MODEL_CATALOG,
+} from "./modelCatalog.generated";
+import type { ModelPricing } from "./modelTypes";
+
+export type { ModelPricing } from "./modelTypes";
+
 export interface OpenRouterModelItem {
   id: string;
   name: string;
@@ -10,164 +18,39 @@ export interface OpenRouterModelItem {
     prompt?: string;
     completion?: string;
     input_cache_read?: string;
+    overrides?: Array<{ min_prompt_tokens?: number }>;
   };
 }
 
-export interface ModelPricing {
-  id: string;
-  name: string;
-  provider: string;
-  family: string;
-  contextWindow: number;
-  inputCostPer1M: number;
-  cachedInputCostPer1M: number;
-  outputCostPer1M: number;
-  badgeText: string;
-}
+/**
+ * Curated snapshot generated from OpenRouter by scripts/sync-models.mjs.
+ * The runtime live sync overwrites prices on top of this; the snapshot
+ * guarantees a complete, current catalog when the network is unavailable.
+ */
+export const INITIAL_MODEL_REGISTRY: Record<string, ModelPricing> =
+  GENERATED_MODEL_CATALOG;
 
-// Curated active models for August 2026
-export const INITIAL_MODEL_REGISTRY: Record<string, ModelPricing> = {
-  "claude-sonnet-5": {
-    id: "anthropic/claude-sonnet-5",
-    name: "Claude Sonnet 5",
-    provider: "Anthropic",
-    family: "Claude BPE",
-    contextWindow: 1000000,
-    inputCostPer1M: 2.0,
-    cachedInputCostPer1M: 0.2,
-    outputCostPer1M: 10.0,
-    badgeText: "1.0M",
-  },
-  "claude-opus-5": {
-    id: "anthropic/claude-opus-5",
-    name: "Claude Opus 5",
-    provider: "Anthropic",
-    family: "Claude BPE",
-    contextWindow: 1000000,
-    inputCostPer1M: 5.0,
-    cachedInputCostPer1M: 0.5,
-    outputCostPer1M: 25.0,
-    badgeText: "1.0M",
-  },
-  "gpt-5.6-sol": {
-    id: "openai/gpt-5.6-sol",
-    name: "GPT-5.6 Sol",
-    provider: "OpenAI",
-    family: "o200k_base",
-    contextWindow: 1050000,
-    inputCostPer1M: 2.5,
-    cachedInputCostPer1M: 0.25,
-    outputCostPer1M: 15.0,
-    badgeText: "1.1M",
-  },
-  "gpt-5.6-terra": {
-    id: "openai/gpt-5.6-terra",
-    name: "GPT-5.6 Terra",
-    provider: "OpenAI",
-    family: "o200k_base",
-    contextWindow: 1050000,
-    inputCostPer1M: 2.0,
-    cachedInputCostPer1M: 0.2,
-    outputCostPer1M: 12.0,
-    badgeText: "1.1M",
-  },
-  "gpt-5.6-luna": {
-    id: "openai/gpt-5.6-luna",
-    name: "GPT-5.6 Luna",
-    provider: "OpenAI",
-    family: "o200k_base",
-    contextWindow: 1050000,
-    inputCostPer1M: 0.2,
-    cachedInputCostPer1M: 0.02,
-    outputCostPer1M: 1.2,
-    badgeText: "1.1M",
-  },
-  "gemini-3.7-flash": {
-    id: "google/gemini-3.7-flash",
-    name: "Gemini 3.7 Flash",
-    provider: "Google",
-    family: "Gemini",
-    contextWindow: 1048576,
-    inputCostPer1M: 0.375,
-    cachedInputCostPer1M: 0.0375,
-    outputCostPer1M: 1.875,
-    badgeText: "1.0M",
-  },
-  "gemini-3.5-flash-lite": {
-    id: "google/gemini-3.5-flash-lite",
-    name: "Gemini 3.5 Flash Lite",
-    provider: "Google",
-    family: "Gemini",
-    contextWindow: 1048576,
-    inputCostPer1M: 0.3,
-    cachedInputCostPer1M: 0.03,
-    outputCostPer1M: 2.5,
-    badgeText: "1.0M",
-  },
-  "deepseek-v4-pro": {
-    id: "deepseek/deepseek-v4-pro-0813",
-    name: "DeepSeek V4 Pro",
-    provider: "DeepSeek",
-    family: "DeepSeek",
-    contextWindow: 1048576,
-    inputCostPer1M: 1.188,
-    cachedInputCostPer1M: 0.04,
-    outputCostPer1M: 3.564,
-    badgeText: "1.0M",
-  },
-  "deepseek-v4-flash": {
-    id: "deepseek/deepseek-v4-flash-0731",
-    name: "DeepSeek V4 Flash",
-    provider: "DeepSeek",
-    family: "DeepSeek",
-    contextWindow: 1310720,
-    inputCostPer1M: 0.14,
-    cachedInputCostPer1M: 0.028,
-    outputCostPer1M: 0.28,
-    badgeText: "1.3M",
-  },
-  "grok-4.6": {
-    id: "x-ai/grok-4.6",
-    name: "Grok 4.6",
-    provider: "xAI",
-    family: "Grok",
-    contextWindow: 500000,
-    inputCostPer1M: 2.0,
-    cachedInputCostPer1M: 0.5,
-    outputCostPer1M: 6.0,
-    badgeText: "500k",
-  },
-  "qwen3.8-max": {
-    id: "qwen/qwen3.8-max",
-    name: "Qwen3.8 Max",
-    provider: "Alibaba",
-    family: "Qwen",
-    contextWindow: 1000000,
-    inputCostPer1M: 2.0,
-    cachedInputCostPer1M: 0.25,
-    outputCostPer1M: 6.0,
-    badgeText: "1.0M",
-  },
-  "qwen3.7-flash": {
-    id: "qwen/qwen3.7-flash",
-    name: "Qwen3.7 Flash",
-    provider: "Alibaba",
-    family: "Qwen",
-    contextWindow: 1000000,
-    inputCostPer1M: 0.03,
-    cachedInputCostPer1M: 0.006,
-    outputCostPer1M: 0.13,
-    badgeText: "1.0M",
-  },
-};
+/** ISO timestamp of the build-time snapshot above. */
+export const MODEL_CATALOG_GENERATED_AT = CATALOG_GENERATED_AT;
 
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const STORAGE_KEY = "tokencraft_live_model_pricing";
-const STORAGE_TIMESTAMP_KEY = "tokencraft_live_pricing_timestamp";
+const STORAGE_KEY = "tokencraft_live_model_pricing_v2";
+const STORAGE_TIMESTAMP_KEY = "tokencraft_live_pricing_timestamp_v2";
+
+function round4(value: number): number {
+  return Number(value.toFixed(4));
+}
+
+/** parseFloat with a finite fallback — never emits NaN into the UI. */
+function parsePrice(value: string | undefined, fallback: number): number {
+  if (value === undefined) return fallback;
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? round4(parsed * 1000000) : fallback;
+}
 
 /**
  * Fetches real-time model pricing from OpenRouter's free public endpoint.
- * Falls back gracefully to INITIAL_MODEL_REGISTRY on network error.
+ * Falls back gracefully to the generated snapshot on network error.
  */
 export async function fetchLiveModelPricing(): Promise<{
   registry: Record<string, ModelPricing>;
@@ -199,16 +82,33 @@ export async function fetchLiveModelPricing(): Promise<{
     Object.entries(updatedRegistry).forEach(([key, model]) => {
       const live = liveMap.get(model.id);
       if (live && live.pricing) {
-        const inputCost = parseFloat(live.pricing.prompt || "0") * 1000000;
-        const cacheCost = parseFloat(live.pricing.input_cache_read || "0") * 1000000;
-        const outputCost = parseFloat(live.pricing.completion || "0") * 1000000;
+        const inputCost = parsePrice(live.pricing.prompt, model.inputCostPer1M);
+        const outputCost = parsePrice(live.pricing.completion, model.outputCostPer1M);
+
+        // A missing or zero input_cache_read means "no cache tier" — falling
+        // back to a $0 cached price would advertise a fake -100% saving.
+        const parsedCache = parseFloat(live.pricing.input_cache_read ?? "");
+        const hasCache = Number.isFinite(parsedCache) && parsedCache > 0;
+
+        const overrides = Array.isArray(live.pricing.overrides)
+          ? live.pricing.overrides
+          : [];
+        const tierThresholds = overrides
+          .map((o) => o.min_prompt_tokens)
+          .filter((n): n is number => typeof n === "number" && n > 0)
+          .sort((a, b) => a - b);
 
         updatedRegistry[key] = {
           ...model,
           contextWindow: live.context_length || model.contextWindow,
-          inputCostPer1M: Number(inputCost.toFixed(4)),
-          cachedInputCostPer1M: Number(cacheCost.toFixed(4)),
-          outputCostPer1M: Number(outputCost.toFixed(4)),
+          inputCostPer1M: inputCost,
+          cachedInputCostPer1M: hasCache
+            ? round4(parsedCache * 1000000)
+            : inputCost,
+          outputCostPer1M: outputCost,
+          noCache: !hasCache,
+          tieredPricing: overrides.length > 0 || Boolean(model.tieredPricing),
+          tieredAboveTokens: tierThresholds[0] ?? model.tieredAboveTokens,
         };
       }
     });
@@ -231,7 +131,7 @@ export async function fetchLiveModelPricing(): Promise<{
       fromCache: false,
     };
   } catch (err) {
-    console.warn("Could not fetch live OpenRouter prices, using cached or initial registry:", err);
+    console.warn("Could not fetch live OpenRouter prices, using cached or generated registry:", err);
 
     // Try reading cached prices from localStorage
     if (typeof window !== "undefined") {
@@ -252,7 +152,7 @@ export async function fetchLiveModelPricing(): Promise<{
 
     return {
       registry: INITIAL_MODEL_REGISTRY,
-      timestamp: "Default Rates",
+      timestamp: "Snapshot Rates",
       fromCache: true,
     };
   }

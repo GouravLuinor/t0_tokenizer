@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "sync:models": "node scripts/sync-models.mjs",
     "create:tool": "node ./scaffolder/bin/create-tier0.mjs"
   },
   "dependencies": {

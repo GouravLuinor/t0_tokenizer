@@ -6,7 +6,7 @@ import {
 } from "../_lib/tokenize";
 
 self.onmessage = (e: MessageEvent<TokenizeRequest>) => {
-  const { id, text, model } = e.data;
+  const { id, text, encoding } = e.data;
 
   if (!text) {
     const empty: TokenizeResponse = {
@@ -23,7 +23,7 @@ self.onmessage = (e: MessageEvent<TokenizeRequest>) => {
   }
 
   try {
-    const result = tokenizeText(text, model);
+    const result = tokenizeText(text, encoding);
     self.postMessage({ ...result, id } satisfies TokenizeResponse);
   } catch (error) {
     console.error("Tokenization worker error:", error);

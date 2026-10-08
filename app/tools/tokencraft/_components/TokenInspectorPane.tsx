@@ -13,7 +13,7 @@ import {
   useTokenCraftStore,
   type VisualViewMode,
 } from "../_store/useTokenCraftStore";
-import type { TokenChunk } from "../_lib/tokenize";
+import type { TokenChunk } from "../_lib/tokenizeTypes";
 import { Button } from "@/components/ui/button";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { ShinyText } from "@/components/ui/shiny-text";

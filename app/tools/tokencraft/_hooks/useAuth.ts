@@ -9,6 +9,19 @@ import {
 
 export type OAuthProvider = "google" | "github";
 
+/**
+ * After an OAuth redirect, Supabase exchanges the `code`/`access_token` and
+ * leaves them in the address bar. Strip them so the URL stays pristine.
+ */
+function stripOAuthParamsFromUrl() {
+  if (typeof window === "undefined") return;
+  const search = window.location.search;
+  const hash = window.location.hash;
+  if (search.includes("code=") || hash.includes("access_token")) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+
 export interface AuthState {
   isConfigured: boolean;
   isReady: boolean;
@@ -37,13 +50,15 @@ export function useAuth(): AuthState {
       if (cancelled) return;
       setSession(data.session ?? null);
       setIsReady(true);
+      stripOAuthParamsFromUrl();
 
       const {
         data: { subscription },
-      } = client.auth.onAuthStateChange((_event, nextSession) => {
+      } = client.auth.onAuthStateChange((event, nextSession) => {
         // Keep this handler synchronous — awaiting other Supabase calls here
         // deadlocks the auth client's internal lock.
         setSession(nextSession);
+        if (event === "SIGNED_IN") stripOAuthParamsFromUrl();
       });
 
       if (cancelled) subscription.unsubscribe();

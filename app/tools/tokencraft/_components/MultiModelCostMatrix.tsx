@@ -34,7 +34,6 @@ import {
   buildMarkdownReport,
   triggerBlobDownload,
 } from "../_lib/reportExport";
-import { shouldPromptSignIn } from "../_lib/authGate";
 import { useAuth } from "../_hooks/useAuth";
 import { useAuthPromptStore } from "../_store/useAuthPromptStore";
 
@@ -85,8 +84,8 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
       ? allModels
       : allModels.filter(([, m]) => m.provider === providerFilter);
 
-  // Export handlers. Sign-in is *offered* on export but never required —
-  // the export always proceeds, dismissed prompt or not.
+  // Export handlers. Feature-gated: unauthenticated visitors trigger the sign-in
+  // modal and the export is blocked until they authenticate.
   const reportParams = () => ({
     tokenCount,
     estimatedOutputTokens,
@@ -95,27 +94,21 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
     models: filteredModels,
   });
 
-  const offerSignIn = () => {
-    if (
-      shouldPromptSignIn({
-        isAuthenticated,
-        trigger: "export",
-        sessionCount: 1,
-      })
-    ) {
-      openAuthPrompt("export");
-    }
-  };
-
   const handleCopyMarkdown = async () => {
-    offerSignIn();
+    if (!isAuthenticated) {
+      openAuthPrompt("export");
+      return;
+    }
     await copyText(buildMarkdownReport(reportParams()));
     setCopiedReport(true);
     setTimeout(() => setCopiedReport(false), 2000);
   };
 
   const handleDownloadJSON = () => {
-    offerSignIn();
+    if (!isAuthenticated) {
+      openAuthPrompt("export");
+      return;
+    }
     triggerBlobDownload(
       JSON.stringify(buildJsonReport(reportParams()), null, 2),
       "application/json",
@@ -124,7 +117,10 @@ export const MultiModelCostMatrix = React.memo(function MultiModelCostMatrix() {
   };
 
   const handleDownloadCSV = () => {
-    offerSignIn();
+    if (!isAuthenticated) {
+      openAuthPrompt("export");
+      return;
+    }
     triggerBlobDownload(
       buildCsvReport(reportParams()),
       "text/csv",

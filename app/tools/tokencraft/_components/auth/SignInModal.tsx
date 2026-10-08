@@ -32,11 +32,40 @@ const PROVIDERS: Array<{
 
 export function SignInModal() {
   const isOpen = useAuthPromptStore((s) => s.isOpen);
+  const trigger = useAuthPromptStore((s) => s.trigger);
   const close = useAuthPromptStore((s) => s.close);
   const { isConfigured, signInWith, signOut, isAuthenticated, session } =
     useAuth();
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  const { title, description } = React.useMemo(() => {
+    if (isAuthenticated) {
+      return {
+        title: "You're signed in",
+        description: `Signed in as ${session?.user?.email ?? "your account"}.`,
+      };
+    }
+    if (trigger === "export") {
+      return {
+        title: "Sign in to Export Reports",
+        description:
+          "Exporting CSV, JSON, and Markdown cost reports requires a free Nor AI account. Token counting and analysis stay free forever.",
+      };
+    }
+    if (trigger === "return-visit") {
+      return {
+        title: "Welcome back to TokenCraft",
+        description:
+          "Sign in to unlock report exports, sync custom presets, and keep your model pricing history.",
+      };
+    }
+    return {
+      title: "Sign in to TokenCraft",
+      description:
+        "Connect with Google or GitHub to save custom presets, export reports, and access account preferences.",
+    };
+  }, [isAuthenticated, session?.user?.email, trigger]);
 
   const handleProvider = async (provider: OAuthProvider) => {
     setPending(true);
@@ -63,12 +92,10 @@ export function SignInModal() {
         <div className="p-6">
           <DialogHeader>
             <DialogTitle className="text-lg">
-              {isAuthenticated ? "You're signed in" : "Sign in to TokenCraft"}
+              {title}
             </DialogTitle>
             <DialogDescription className="mt-2 font-sans normal-case leading-relaxed text-zinc-400">
-              {isAuthenticated
-                ? `Signed in as ${session?.user?.email ?? "your account"}.`
-                : "Saving presets and keeping a history of your cost reports is optional — TokenCraft stays free and complete without an account."}
+              {description}
             </DialogDescription>
           </DialogHeader>
 

@@ -19,7 +19,13 @@ import { NumberTicker } from "@/components/ui/number-ticker";
 import { ShinyText } from "@/components/ui/shiny-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { copyText } from "@/lib/clipboard";
-import { formatNumber, stringToHex } from "@/lib/utils";
+import {
+  formatNumber,
+  stringToHex,
+  formatCurrency,
+} from "@/lib/utils";
+import { ContextBudgetBar } from "./ContextBudgetBar";
+import { getCurrentModel } from "../_lib/modelRegistry";
 import {
   Search,
   Copy,
@@ -219,6 +225,12 @@ export function TokenInspectorPane() {
   const isWorkerDegraded = useTokenCraftStore((s) => s.isWorkerDegraded);
   const viewMode = useTokenCraftStore((s) => s.viewMode);
   const setViewMode = useTokenCraftStore((s) => s.setViewMode);
+  const wordCount = useTokenCraftStore((s) => s.wordCount);
+  const selectedModel = useTokenCraftStore((s) => s.selectedModel);
+  const modelsRegistry = useTokenCraftStore((s) => s.modelsRegistry);
+  const currentModel = getCurrentModel(modelsRegistry, selectedModel);
+  const estimatedInputCost =
+    (tokenCount * currentModel.inputCostPer1M) / 1_000_000;
 
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState(""); // debounced
@@ -408,66 +420,65 @@ export function TokenInspectorPane() {
   }, [tokenChunks, characterCount]);
 
   return (
-    <div className="flex flex-col min-h-[520px] lg:min-h-0 lg:h-full rounded-xl border border-surface-border bg-surface-default overflow-hidden transition-all duration-200 hover:border-surface-borderHover">
+    <div className="flex flex-col min-h-[520px] min-w-0 lg:min-h-[640px] lg:h-full overflow-hidden transition-all duration-200">
       {/* Pane Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-surface-border bg-surface-subtle/70 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
-          <span className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-medium">
-            BPE Token Inspector
+      <div className="flex items-center gap-2 border-b border-zinc-800 px-4 py-3">
+        <Layers className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
+        <span className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-medium">
+          BPE Token Inspector
+        </span>
+      </div>
+
+      {/* 4-Stat Metric Grid */}
+      <div
+        role="group"
+        aria-label="Tokenization metrics"
+        className="grid grid-cols-2 gap-2.5 px-4 py-3 sm:grid-cols-4 sm:gap-3"
+      >
+        <div
+          role="status"
+          className="flex flex-col gap-1 rounded-md border border-zinc-800 bg-zinc-900/40 p-3"
+        >
+          <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
+            Total tokens
           </span>
-          <span
-            aria-live="polite"
-            aria-atomic="true"
-            className="text-[10px] px-2 py-0.5 rounded bg-surface-elevated text-sky-400 border border-sky-500/20 font-mono tabular-nums font-medium"
-          >
-            <NumberTicker value={tokenCount} />{" "}
-            {tokenCount === 1 ? "Token" : "Tokens"}
+          <span className="text-xl font-semibold tabular-nums text-zinc-100">
+            <NumberTicker value={tokenCount} />
           </span>
         </div>
-
-        {/* View Mode Segmented Controls */}
-        <div
-          role="group"
-          aria-label="Token visualization mode"
-          className="flex items-center p-0.5 rounded-lg bg-surface-elevated border border-surface-border text-xs font-mono"
-        >
-          {VIEW_MODES.map(({ mode, label, full }) => {
-            const Icon = VIEW_MODE_ICONS[mode];
-            const active = viewMode === mode;
-            return (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                aria-pressed={active}
-                title={`${full} view`}
-                className={`px-2 py-1 rounded-md transition-all duration-150 ease-out-expo flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 ${
-                  active
-                    ? "bg-surface-default text-zinc-100 border border-surface-borderHover font-medium shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-200 border border-transparent active:bg-surface-default/60"
-                }`}
-              >
-                <Icon
-                  className={`w-3 h-3 ${
-                    mode === "chips"
-                      ? "text-sky-400"
-                      : mode === "ids"
-                      ? "text-cyan-400"
-                      : mode === "heatmap"
-                      ? "text-amber-400"
-                      : "text-violet-400"
-                  }`}
-                  aria-hidden="true"
-                />
-                <span className="hidden sm:inline">{label}</span>
-              </button>
-            );
-          })}
+        <div className="flex flex-col gap-1 rounded-md border border-zinc-800 bg-zinc-900/40 p-3">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
+            Characters
+          </span>
+          <span className="text-xl font-semibold tabular-nums text-zinc-100">
+            <NumberTicker value={characterCount} />
+          </span>
+        </div>
+        <div className="flex flex-col gap-1 rounded-md border border-zinc-800 bg-zinc-900/40 p-3">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
+            Words
+          </span>
+          <span className="text-xl font-semibold tabular-nums text-zinc-100">
+            <NumberTicker value={wordCount} />
+          </span>
+        </div>
+        <div className="flex flex-col gap-1 rounded-md border border-zinc-800 bg-zinc-900/40 p-3">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
+            Estimated input cost
+          </span>
+          <span className="text-xl font-semibold tabular-nums text-zinc-100">
+            {formatCurrency(estimatedInputCost, 6)}
+          </span>
         </div>
       </div>
 
+      {/* Inline Context Meter */}
+      <div className="px-4 pb-3">
+        <ContextBudgetBar />
+      </div>
+
       {/* Secondary Filter & Action Sub-Bar */}
-      <div className="flex items-center justify-between gap-2 px-4 py-2 bg-surface-subtle/40 border-b border-surface-border">
+      <div className="flex flex-wrap items-center gap-2 border-b border-surface-border bg-surface-subtle/40 px-4 py-2">
         <div className="relative">
           <Search
             className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-400 pointer-events-none"
@@ -501,12 +512,51 @@ export function TokenInspectorPane() {
           </div>
         )}
 
+        {/* View Mode Segmented Controls — placed directly above the chips body */}
+        <div
+          role="group"
+          aria-label="Token visualization mode"
+          className="ml-auto flex items-center p-0.5 rounded-md bg-surface-elevated border border-surface-border text-xs font-mono"
+        >
+          {VIEW_MODES.map(({ mode, label, full }) => {
+            const Icon = VIEW_MODE_ICONS[mode];
+            const active = viewMode === mode;
+            return (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                aria-pressed={active}
+                title={`${full} view`}
+                className={`px-2 py-1 rounded-md transition-all duration-150 ease-out-expo flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 ${
+                  active
+                    ? "bg-surface-default text-zinc-100 border border-surface-borderHover font-medium shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200 border border-transparent active:bg-surface-default/60"
+                }`}
+              >
+                <Icon
+                  className={`w-3 h-3 ${
+                    mode === "chips"
+                      ? "text-sky-400"
+                      : mode === "ids"
+                      ? "text-cyan-400"
+                      : mode === "heatmap"
+                      ? "text-amber-400"
+                      : "text-violet-400"
+                  }`}
+                  aria-hidden="true"
+                />
+                <span className="hidden sm:inline">{label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <Button
           variant="ghost"
           size="sm"
           onClick={handleCopyTokenIds}
           disabled={tokenChunks.length === 0}
-          className="h-6 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated ml-auto"
+          className="h-6 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
           aria-label="Copy IDs as JSON"
         >
           {copiedIds ? (
@@ -531,16 +581,8 @@ export function TokenInspectorPane() {
         </div>
       )}
 
-      {/* Completion announcer — single polite channel (role="status" implies
-          aria-live:polite) for tokenization results */}
-      <span className="sr-only" role="status">
-        {!isProcessing && tokenCount > 0
-          ? `Tokenized ${formatNumber(tokenCount)} tokens`
-          : ""}
-      </span>
-
       {/* Token Visualizer Body */}
-      <div className="flex-1 min-h-0 p-4 font-mono text-xs">
+      <div className="flex-1 min-h-[260px] p-4 font-mono text-xs">
         {tokenChunks.length === 0 && isProcessing ? (
           /* First-compute skeleton — fills the same flex body, so swapping in
              the stream never shifts layout */
@@ -670,7 +712,7 @@ export function TokenInspectorPane() {
           </div>
         ) : (
           /* Virtualized Token Stream */
-          <div ref={streamRef} className="h-full">
+          <div ref={streamRef} className="h-full min-h-[260px]">
             {containerWidth > 0 && rows.length > 0 ? (
               <VList
                 style={{ height: "100%" }}

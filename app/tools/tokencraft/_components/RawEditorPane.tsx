@@ -3,13 +3,10 @@
 import React, { useRef, useState, useMemo, useCallback } from "react";
 import { useTokenCraftStore } from "../_store/useTokenCraftStore";
 import { Button } from "@/components/ui/button";
-import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { DotGrid } from "@/components/ui/dot-grid";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   Copy,
-  Trash2,
   Upload,
   Check,
   FileText,
@@ -20,7 +17,6 @@ import {
 import { formatBytes, formatNumber } from "@/lib/utils";
 import { copyText } from "@/lib/clipboard";
 
-const LINE_HEIGHT_PX = 24;
 const MAX_FILE_BYTES = 2 * 1024 * 1024; // 2 MB guard — keeps the worker responsive
 
 export const RawEditorPane = React.memo(function RawEditorPane() {
@@ -37,12 +33,7 @@ export const RawEditorPane = React.memo(function RawEditorPane() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const gutterContentRef = useRef<HTMLDivElement>(null);
   const dragDepthRef = useRef(0);
-
-  // Visible gutter window: re-renders only when the line range changes,
-  // never per scroll pixel. Transform sync is done via direct DOM writes.
-  const [gutterRange, setGutterRange] = useState({ start: 0, count: 24 });
 
   const lineCount = useMemo(
     () => (rawText ? rawText.split("\n").length : 0),
@@ -112,46 +103,16 @@ export const RawEditorPane = React.memo(function RawEditorPane() {
     readFile(file);
   };
 
-  // Gutter ↔ textarea scroll sync without React re-renders.
-  const syncGutter = useCallback(() => {
-    const ta = textareaRef.current;
-    if (!ta || !gutterContentRef.current) return;
-
-    gutterContentRef.current.style.transform = `translateY(${-ta.scrollTop}px)`;
-
-    // Windowed line numbers: only update state when the visible row range shifts
-    const viewportRows = Math.ceil(ta.clientHeight / LINE_HEIGHT_PX) + 2;
-    const start = Math.floor(ta.scrollTop / LINE_HEIGHT_PX);
-    setGutterRange((prev) =>
-      prev.start === start && prev.count === viewportRows
-        ? prev
-        : { start, count: viewportRows }
-    );
-  }, []);
-
-  const gutterStart = rawText ? gutterRange.start : 0;
-  const gutterCount = Math.max(gutterRange.count, Math.min(lineCount, 24));
-  const visibleLines = Array.from(
-    { length: Math.min(gutterCount, Math.max(0, lineCount - gutterStart)) },
-    (_, i) => gutterStart + i + 1
-  );
-
   return (
-    <SpotlightCard
-      spotlightColor="rgba(16, 185, 129, 0.08)"
-      spotlightSize={400}
+    <div
+      className="flex flex-col min-h-[520px] lg:min-h-[640px] min-w-0 lg:h-full transition-all duration-200"
       onDragEnter={handleDragEnter}
       onDragOver={(e) => e.preventDefault()}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`flex flex-col min-h-[520px] lg:min-h-0 lg:h-full rounded-xl border transition-all duration-200 bg-surface-default ${
-        isDragging
-          ? "border-sky-400/80 bg-surface-elevated ring-2 ring-sky-500/20"
-          : "border-surface-border hover:border-surface-borderHover"
-      }`}
     >
       {/* Pane Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border bg-surface-subtle/70 backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
         <div className="flex items-center gap-2">
           <FileText className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
           <span className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-medium">
@@ -160,71 +121,6 @@ export const RawEditorPane = React.memo(function RawEditorPane() {
           <span className="text-[10px] font-mono text-zinc-400 tabular-nums">
             ({formatNumber(lineCount)} {lineCount === 1 ? "line" : "lines"})
           </span>
-        </div>
-
-        {/* Editor Actions */}
-        <div className="flex items-center gap-1">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-            accept=".txt,.md,.json,.js,.ts,.tsx,.py,.html,.css"
-            aria-label="Upload document file"
-          />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
-                aria-label="Upload File"
-              >
-                <Upload className="w-3.5 h-3.5 mr-1 text-zinc-400" aria-hidden="true" />
-                <span>Upload</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Upload File</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-                disabled={!rawText}
-                className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
-                aria-label="Copy input text"
-              >
-                {copied ? (
-                  <Check className="w-3.5 h-3.5 text-sky-400 mr-1" aria-hidden="true" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
-                )}
-                <span>{copied ? "Copied" : "Copy"}</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Copy Text</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearText}
-                disabled={!rawText}
-                className="h-7 px-2 text-xs text-zinc-400 hover:text-rose-400 hover:bg-surface-elevated"
-                aria-label="Clear input text"
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
-                <span>Clear</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Clear Text</TooltipContent>
-          </Tooltip>
         </div>
       </div>
 
@@ -262,34 +158,17 @@ export const RawEditorPane = React.memo(function RawEditorPane() {
           />
         )}
 
-        {/* Line Numbers Gutter — windowed rendering, transform-synced scroll */}
-        {rawText && (
-          <div
-            aria-hidden="true"
-            className="relative w-11 shrink-0 py-3 bg-surface-subtle/50 border-r border-surface-border select-none overflow-hidden text-right pr-2.5 text-[11px] font-mono leading-6 text-zinc-600 tabular-nums"
-          >
-            <div ref={gutterContentRef} className="will-change-transform">
-              {visibleLines.map((lineNum) => (
-                <div key={lineNum} style={{ height: LINE_HEIGHT_PX }}>
-                  {formatNumber(lineNum)}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Textarea — wrap="off" guarantees 1 logical line == 1 visual row,
-            keeping the gutter mapping exact for arbitrarily long lines */}
+        {/* Textarea — soft word wrap keeps long prompt lines readable: the
+            inspection chips and cost model don't care about visual columns. */}
         <textarea
           ref={textareaRef}
           value={rawText}
           onChange={(e) => setRawText(e.target.value)}
-          onScroll={syncGutter}
           placeholder="Paste or drop your raw prompt, system instructions, RAG context, or code here…"
           spellCheck={false}
-          wrap="off"
+          wrap="soft"
           aria-label="Raw prompt text input"
-          className="relative z-10 flex-1 p-3 bg-transparent text-zinc-200 font-mono text-xs leading-6 resize-none outline-none placeholder:text-zinc-600 overflow-auto whitespace-pre"
+          className="relative z-10 flex-1 min-h-[300px] whitespace-pre-wrap break-words p-3 bg-transparent text-zinc-200 font-mono text-xs leading-6 resize-none outline-none placeholder:text-zinc-600 overflow-auto"
         />
 
         {/* Drag Overlay Hint */}
@@ -304,6 +183,55 @@ export const RawEditorPane = React.memo(function RawEditorPane() {
             </span>
           </div>
         )}
+      </div>
+
+      {/* Editor Controls — Clear / Upload / Copy, one row directly under the
+          textarea like Tiktokenizer */}
+      <div className="flex items-center gap-1 border-t border-zinc-800 px-3 py-1.5">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          accept=".txt,.md,.json,.js,.ts,.tsx,.py,.html,.css"
+          aria-label="Upload document file"
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={clearText}
+          disabled={!rawText}
+          className="h-7 px-2 text-xs text-zinc-400 hover:text-rose-400 hover:bg-surface-elevated"
+          aria-label="Clear input text"
+        >
+          <X className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
+          <span>Clear</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
+          aria-label="Upload File"
+        >
+          <Upload className="w-3.5 h-3.5 mr-1 text-zinc-400" aria-hidden="true" />
+          <span>Upload</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleCopy}
+          disabled={!rawText}
+          className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated"
+          aria-label="Copy input text"
+        >
+          {copied ? (
+            <Check className="w-3.5 h-3.5 text-sky-400 mr-1" aria-hidden="true" />
+          ) : (
+            <Copy className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
+          )}
+          <span>{copied ? "Copied" : "Copy"}</span>
+        </Button>
       </div>
 
       {/* Stats Bar */}
@@ -337,9 +265,9 @@ export const RawEditorPane = React.memo(function RawEditorPane() {
 
         <div className="flex items-center gap-1.5 text-zinc-400 text-[10px]">
           <Code2 className="w-3 h-3 text-zinc-400" aria-hidden="true" />
-          <span>UTF-8 · No Wrap</span>
+          <span>UTF-8 · Word wrap</span>
         </div>
       </div>
-    </SpotlightCard>
+    </div>
   );
 });

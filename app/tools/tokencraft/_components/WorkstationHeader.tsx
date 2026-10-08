@@ -27,7 +27,7 @@ import {
   Undo2,
 } from "lucide-react";
 
-export const TopToolbar = React.memo(function TopToolbar() {
+export function WorkstationHeader() {
   const selectedModel = useTokenCraftStore((s) => s.selectedModel);
   const setSelectedModel = useTokenCraftStore((s) => s.setSelectedModel);
   const modelsRegistry = useTokenCraftStore((s) => s.modelsRegistry);
@@ -48,8 +48,32 @@ export const TopToolbar = React.memo(function TopToolbar() {
   const currentModel = getCurrentModel(modelsRegistry, selectedModel);
 
   return (
-    <header className="flex flex-wrap items-center justify-start gap-3 rounded-xl border border-white/10 bg-surface-subtle/40 p-3">
-      {/* Control Actions — brand identity lives in the SiteHeader */}
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 bg-[#0d1117] px-4 py-2.5">
+      {/* Left: Input Mode Tabs */}
+      <div
+        role="group"
+        aria-label="Input mode"
+        className="flex items-center rounded-md border border-zinc-800 bg-zinc-900/50 p-0.5 text-xs font-mono"
+      >
+        <button
+          type="button"
+          aria-pressed="true"
+          className="rounded bg-zinc-800 px-3 py-1 font-medium text-zinc-100"
+        >
+          Plain text
+        </button>
+        <button
+          type="button"
+          aria-pressed="false"
+          disabled
+          title="Chat message mode requires per-message overhead accounting — not yet wired to the engine"
+          className="cursor-not-allowed rounded px-3 py-1 text-zinc-600"
+        >
+          Chat messages
+        </button>
+      </div>
+
+      {/* Right: Commands + Model + Presets + Minify */}
       <div className="flex flex-wrap items-center gap-2">
         {/* Command Palette Trigger */}
         <Button
@@ -73,7 +97,7 @@ export const TopToolbar = React.memo(function TopToolbar() {
               variant="outline"
               size="sm"
               className="gap-2 bg-surface-default border-surface-border font-mono text-xs text-zinc-200 hover:text-white hover:border-surface-borderHover h-8"
-              aria-label={`${currentModel.name} ${currentModel.badgeText} — select tokenizer model`}
+              aria-label={`Select Tokenizer Model, currently ${currentModel.name} ${currentModel.badgeText}`}
             >
               <Cpu className="w-3.5 h-3.5 text-sky-400" aria-hidden="true" />
               <span>{currentModel.name}</span>{" "}
@@ -170,7 +194,7 @@ export const TopToolbar = React.memo(function TopToolbar() {
           </Tooltip>
         )}
 
-        {/* Minify Action - Clean Compiler Optimizer aesthetic */}
+        {/* Minify Action */}
         <Button
           variant="default"
           size="sm"
@@ -183,7 +207,6 @@ export const TopToolbar = React.memo(function TopToolbar() {
           <span>Minify Prompt</span>
         </Button>
       </div>
-    </header>
+    </div>
   );
-});
-
+}

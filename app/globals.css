@@ -77,33 +77,33 @@ html {
 
 /* 5-Color Calibrated BPE Token Boundary Classes - Restrained & Functional */
 .bpe-token-0 {
-  background-color: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #34D399;
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.16);
+  color: #6EE7B7;
 }
 
 .bpe-token-1 {
-  background-color: rgba(6, 182, 212, 0.12);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  color: #22D3EE;
+  background-color: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.16);
+  color: #67E8F9;
 }
 
 .bpe-token-2 {
-  background-color: rgba(139, 92, 246, 0.12);
-  border: 1px solid rgba(139, 92, 246, 0.25);
-  color: #A78BFA;
+  background-color: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.16);
+  color: #C4B5FD;
 }
 
 .bpe-token-3 {
-  background-color: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.25);
-  color: #FBBF24;
+  background-color: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.16);
+  color: #FCD34D;
 }
 
 .bpe-token-4 {
-  background-color: rgba(244, 63, 94, 0.12);
-  border: 1px solid rgba(244, 63, 94, 0.25);
-  color: #FB7185;
+  background-color: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.16);
+  color: #FDA4AF;
 }
 
 /* Text Shimmer Effect */

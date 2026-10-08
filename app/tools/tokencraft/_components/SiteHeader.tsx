@@ -1,4 +1,3 @@
-import { ModelStatusChip } from "./ModelStatusChip";
 import { SignInButton } from "./auth/SignInButton";
 
 export function SiteHeader() {
@@ -20,7 +19,6 @@ export function SiteHeader() {
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
-          <ModelStatusChip />
           <SignInButton />
         </div>
       </div>

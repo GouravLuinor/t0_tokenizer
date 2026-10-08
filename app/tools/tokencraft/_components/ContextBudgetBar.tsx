@@ -54,7 +54,7 @@ export const ContextBudgetBar = React.memo(function ContextBudgetBar() {
   return (
     <div
       role="region"
-      aria-label="Context Window Budget"
+      aria-label="Context Window Safety Gauge"
       className="rounded-xl border border-white/10 bg-surface-default px-4 py-3.5 sm:px-5"
     >
       <meter

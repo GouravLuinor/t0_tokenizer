@@ -45,7 +45,7 @@ export default function TokenCraftPage() {
         {/* Section 1 — Hero Workstation */}
         <section
           aria-label="Token Crafting Workstation"
-          className="mx-auto w-full max-w-6xl px-4 pt-12 pb-16 md:px-6 md:pt-16 lg:px-8"
+          className="mx-auto w-full max-w-7xl px-4 pt-12 pb-16 md:px-6 md:pt-16 lg:px-8"
         >
           <header className="mb-10 md:mb-12 max-w-3xl">
             <h1 className="text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl">

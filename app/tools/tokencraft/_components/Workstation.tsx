@@ -4,13 +4,12 @@ import React, { useEffect } from "react";
 import { useTokenizer } from "../_hooks/useTokenizer";
 import { useGlobalShortcuts } from "../_hooks/useGlobalShortcuts";
 import { useTokenCraftStore } from "../_store/useTokenCraftStore";
-import { TopToolbar } from "./TopToolbar";
+import { useVisitorSession } from "../_hooks/useVisitorSession";
 import { RawEditorPane } from "./RawEditorPane";
 import { TokenInspectorPane } from "./TokenInspectorPane";
-import { ContextBudgetBar } from "./ContextBudgetBar";
+import { WorkstationHeader } from "./WorkstationHeader";
 import { PromptDiffDialog } from "./PromptDiffDialog";
 import { CommandPalette } from "./CommandPalette";
-import { useVisitorSession } from "../_hooks/useVisitorSession";
 import { SignInModal } from "./auth/SignInModal";
 
 export function Workstation() {
@@ -36,21 +35,21 @@ export function Workstation() {
         aria-hidden="true"
       />
 
-      <div className="relative flex flex-col gap-8 md:gap-10">
-        <TopToolbar />
+      {/* ONE cohesive card wrapping the full workstation */}
+      <div
+        id="workspace"
+        className="relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-[#0d1117]"
+      >
+        {/* Header: mode tabs left, model + presets + minify right */}
+        <WorkstationHeader />
 
-        {/* Primary Split-Pane Workspace: Left (Editor) vs Right (Token Inspector) */}
-        <section
-          id="workspace"
-          aria-label="Interactive Workspace"
-          className="grid grid-cols-1 gap-6 lg:grid-cols-2"
-        >
-          <RawEditorPane />
+        {/* Two-pane body */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:min-h-[640px]">
+          <div className="min-w-0 border-b border-zinc-800 lg:border-b-0 lg:border-r">
+            <RawEditorPane />
+          </div>
           <TokenInspectorPane />
-        </section>
-
-        {/* Context Window Budget — the component owns its own labeled region */}
-        <ContextBudgetBar />
+        </div>
       </div>
 
       {/* Global Modals & Dialogs */}

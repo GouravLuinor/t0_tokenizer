@@ -9,7 +9,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
-  title: "TokenCraft & Context Optimizer | NorAI Tier-0 Flagship",
+  title: "TokenCraft & Context Optimizer | Nor AI Tier-0 Flagship",
   description:
     "In-browser BPE tokenization with exact o200k and cl100k token boundaries, real-time context window inspection, multi-model cost projection, and prompt minification. Your text never leaves your device.",
   keywords: [
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     "o200k",
     "context window optimizer",
     "prompt minifier",
-    "NorAI",
+    "Nor AI",
   ],
 };
 

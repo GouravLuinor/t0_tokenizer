@@ -71,7 +71,7 @@ export function StudioFooter() {
                 id="footer-norai"
                 className="font-mono text-[11px] uppercase tracking-wider text-zinc-400"
               >
-                More from NorAI
+                More from Nor AI
               </h2>
               <ul className="mt-4 flex flex-col gap-2.5">
                 <li>
@@ -81,17 +81,7 @@ export function StudioFooter() {
                     rel="noreferrer noopener"
                     target="_blank"
                   >
-                    NorAI.tech
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/GouravLuinor"
-                    className="text-sm text-zinc-400 transition-colors hover:text-zinc-100"
-                    rel="noreferrer noopener"
-                    target="_blank"
-                  >
-                    Source code
+                    norai.tech
                   </a>
                 </li>
               </ul>
@@ -100,7 +90,7 @@ export function StudioFooter() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-zinc-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} NorAI. Uttar Pradesh, India.</p>
+          <p>© {new Date().getFullYear()} Nor AI. Uttar Pradesh, India.</p>
           <p>
             Model data &amp; pricing from{" "}
             <a

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { useAuthPromptStore } from "../../_store/useAuthPromptStore";
 import { isSupabaseConfigured } from "../../_lib/supabaseClient";
 import { useAuth } from "../../_hooks/useAuth";
@@ -65,7 +65,7 @@ export function SignInButton() {
 
   if (isSupabaseConfigured) {
     if (isAuthenticated && session?.user) {
-      return <UserPill session={session} onSignOut={signOut} />;
+      return <UserMenu session={session} onSignOut={signOut} />;
     }
     return <SignInButtonLabel onClick={() => open("manual")} />;
   }
@@ -78,20 +78,28 @@ export function SignInButton() {
   );
 }
 
-function UserPill({
+function UserMenu({
   session,
   onSignOut,
 }: {
   session: NonNullable<ReturnType<typeof useAuth>["session"]>;
   onSignOut: () => Promise<void>;
 }) {
-  const email = session.user.email ?? "";
-  const initial = email[0]?.toUpperCase() ?? "U";
-  const provider = session.user.app_metadata?.provider;
-  const providerLabel =
-    typeof provider === "string" && provider.length > 0
-      ? provider.charAt(0).toUpperCase() + provider.slice(1)
-      : null;
+  const email =
+    session.user.email ??
+    (session.user.user_metadata?.email as string | undefined) ??
+    "";
+  const initial = email.length > 0 ? email[0].toUpperCase() : null;
+  const rawProvider =
+    session.user.app_metadata?.provider ??
+    session.user.identities?.[0]?.provider;
+  const providerLabel = React.useMemo(() => {
+    if (typeof rawProvider !== "string" || !rawProvider) return null;
+    const lower = rawProvider.toLowerCase();
+    if (lower === "github") return "GitHub";
+    if (lower === "google") return "Google";
+    return rawProvider.charAt(0).toUpperCase() + rawProvider.slice(1);
+  }, [rawProvider]);
 
   return (
     <DropdownMenu>
@@ -99,28 +107,30 @@ function UserPill({
         <button
           type="button"
           aria-label="Account menu"
-          className="flex items-center gap-2 rounded-full border border-surface-border bg-surface-default py-1 pl-1 pr-2.5 text-xs text-zinc-200 transition-colors hover:border-surface-borderHover hover:bg-surface-elevated"
+          className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sky-400/30 bg-sky-500/10 font-mono text-xs font-bold text-sky-300 transition-colors hover:border-sky-400/60 hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full border border-sky-400/30 bg-sky-500/10 font-mono text-xs text-sky-300">
-            {initial}
-          </span>
-          <span className="max-w-[130px] truncate font-mono text-xs text-zinc-300 sm:max-w-[180px]">
-            {email}
-          </span>
-          <ChevronDown className="h-3.5 w-3.5 text-zinc-500" aria-hidden="true" />
+          {initial ? (
+            initial
+          ) : (
+            <User className="h-4 w-4 text-sky-300" aria-hidden="true" />
+          )}
+          <span
+            className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-background bg-emerald-500"
+            aria-hidden="true"
+          />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] uppercase tracking-wider text-zinc-500">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">
               Signed in as
             </span>
             <span className="truncate font-mono text-xs text-zinc-200">
-              {email}
+              {email || "User"}
             </span>
             {providerLabel && (
-              <span className="mt-1 inline-flex w-fit items-center rounded-full border border-sky-400/25 bg-sky-500/10 px-2 py-0.5 text-[10px] font-mono text-sky-300">
+              <span className="mt-1 inline-flex w-fit items-center rounded-full border border-sky-400/25 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] text-sky-300">
                 {providerLabel}
               </span>
             )}
@@ -129,10 +139,10 @@ function UserPill({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => void onSignOut()}
-          className="cursor-pointer text-rose-400 hover:text-rose-300"
+          className="cursor-pointer text-rose-400 hover:text-rose-300 focus:bg-rose-500/10 focus:text-rose-300"
         >
           <LogOut className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
-          Sign out
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

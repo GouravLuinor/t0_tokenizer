@@ -55,7 +55,7 @@ export function buildMarkdownReport({
   outputMultiplier,
   models,
 }: ReportParams): string {
-  let md = `### NorAI TokenCraft Cost & Multi-Model Analysis Report (2026)\n\n`;
+  let md = `### Nor AI TokenCraft Cost & Multi-Model Analysis Report (2026)\n\n`;
   md += `* **Prompt Input Tokens:** ${formatNumber(tokenCount)}\n`;
   md += `* **Estimated Output Tokens (${outputMultiplier}x):** ${formatNumber(estimatedOutputTokens)}\n`;
   md += `* **Batch Executions:** ${formatNumber(batchVolume)}\n\n`;

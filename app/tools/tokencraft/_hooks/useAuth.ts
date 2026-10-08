@@ -46,11 +46,30 @@ export function useAuth(): AuthState {
       const client = await getSupabaseClient();
       if (cancelled || !client) return;
 
+      const code =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("code")
+          : null;
+
+      let hasSession = false;
+      if (code) {
+        const { data } = await client.auth.exchangeCodeForSession(code);
+        if (cancelled) return;
+        if (data.session) {
+          hasSession = true;
+          setSession(data.session);
+        }
+        stripOAuthParamsFromUrl();
+      }
+
       const { data } = await client.auth.getSession();
       if (cancelled) return;
-      setSession(data.session ?? null);
+      if (data.session) {
+        setSession(data.session);
+      } else if (!hasSession) {
+        setSession(null);
+      }
       setIsReady(true);
-      stripOAuthParamsFromUrl();
 
       const {
         data: { subscription },

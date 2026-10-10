@@ -7,7 +7,7 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
-let cached: SupabaseClient | null | undefined;
+let cachedPromise: Promise<SupabaseClient | null> | null = null;
 
 /**
  * Lazily constructs the Supabase client. The SDK is a ~45 kB gz dynamic import
@@ -16,25 +16,25 @@ let cached: SupabaseClient | null | undefined;
  * the expected local/preview state.
  */
 export async function getSupabaseClient(): Promise<SupabaseClient | null> {
-  if (cached !== undefined) return cached;
-
   if (!isSupabaseConfigured || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    cached = null;
-    return cached;
+    return null;
   }
 
-  const { createClient } = await import("@supabase/supabase-js");
-  cached = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  });
-  return cached;
+  if (!cachedPromise) {
+    cachedPromise = import("@supabase/supabase-js").then(({ createClient }) =>
+      createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+      })
+    );
+  }
+  return cachedPromise;
 }
 
 /** Test seam — drops the memoized client. */
 export function resetSupabaseClientCache() {
-  cached = undefined;
+  cachedPromise = null;
 }

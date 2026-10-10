@@ -58,6 +58,13 @@ export function useAuth(): AuthState {
         if (data.session) {
           hasSession = true;
           setSession(data.session);
+          const meta = data.session.user.user_metadata ?? {};
+          void client.auth.updateUser({
+            data: {
+              origin_app: meta.origin_app ?? "tokens",
+              last_tool: "tokens",
+            },
+          });
         }
         stripOAuthParamsFromUrl();
       }

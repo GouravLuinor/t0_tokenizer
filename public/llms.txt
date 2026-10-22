@@ -1,0 +1,22 @@
+# TokenCraft
+
+> Free token counter and LLM cost calculator by Nor AI. Paste a prompt to get its token count and what one call, or many calls, costs on 90+ models at OpenRouter list rates. Runs entirely in the browser; prompts are never uploaded.
+
+- Exact counts for OpenAI models (o200k_base and cl100k_base encodings).
+- Claude, Gemini, Llama, Mistral, DeepSeek, Qwen, Grok and other models are estimated with o200k_base and labelled "≈ Estimate".
+- Prices: OpenRouter's public catalog, refreshed weekly in the build and fetched live when the page opens. List rates in USD; batch discounts excluded.
+- Features: token boundaries underlined in the editor, context-window fit including the expected reply, cheapest-model ranking for the exact prompt, prompt minifier with savings counted in tokens.
+
+## Pages
+
+- [Token counter & cost calculator](https://tokens.norai.tech/tools/tokencraft): the tool
+- [Per-model pages](https://tokens.norai.tech/sitemap.xml): rate card and worked cost examples for each model
+
+## More from Nor AI
+
+- [Nor AI](https://norai.tech)
+- [SchemaCraft](https://schema.norai.tech): JSON to Zod, Pydantic and TypeScript types
+- [RegexCraft](https://regex.norai.tech): regex tester with plain-English explanations
+- [Judgewright](https://judge.norai.tech): calibrate your LLM judge against human labels
+- [Anchorflow](https://anchor.norai.tech): pin and audit GitHub Actions workflows
+- [Smart Rozgar](https://rozgar.norai.tech): Sarkari job alerts in Hindi and English

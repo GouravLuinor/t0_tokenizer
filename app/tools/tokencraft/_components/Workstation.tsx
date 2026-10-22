@@ -1,58 +1,50 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useTokenizer } from "../_hooks/useTokenizer";
 import { useGlobalShortcuts } from "../_hooks/useGlobalShortcuts";
+import { useMinifySavings } from "../_hooks/useMinifySavings";
 import { useTokenCraftStore } from "../_store/useTokenCraftStore";
-import { useVisitorSession } from "../_hooks/useVisitorSession";
-import { RawEditorPane } from "./RawEditorPane";
-import { TokenInspectorPane } from "./TokenInspectorPane";
-import { WorkstationHeader } from "./WorkstationHeader";
+import { PromptPane } from "./prompt/PromptPane";
+import { AnswerPanel } from "./answer/AnswerPanel";
+import { MobileTally } from "./answer/MobileTally";
 import { PromptDiffDialog } from "./PromptDiffDialog";
 import { CommandPalette } from "./CommandPalette";
 import { SignInModal } from "./auth/SignInModal";
 
+/** The first viewport: the prompt on the left, the answer on the right. */
 export function Workstation() {
-  // Mount the Web Worker tokenizer hook + global keyboard shortcuts
   useTokenizer();
   useGlobalShortcuts();
-  useVisitorSession();
+  useMinifySavings();
 
   const syncLivePrices = useTokenCraftStore((s) => s.syncLivePrices);
 
   useEffect(() => {
-    // Restore persisted workspace (text, model, view prefs) after mount —
-    // the tokenizer hook then re-derives token data from the restored text
-    void useTokenCraftStore.persist.rehydrate();
-    syncLivePrices();
+    // Restore the saved workspace after mount; the tokenizer then re-derives
+    // token data from the restored text
+    void Promise.resolve(useTokenCraftStore.persist.rehydrate()).then(() => {
+      // Model pages link here with ?model=<key>; it wins over the saved pick
+      const wanted = new URLSearchParams(window.location.search).get("model");
+      const state = useTokenCraftStore.getState();
+      if (wanted && state.modelsRegistry[wanted]) state.setSelectedModel(wanted);
+    });
+    void syncLivePrices();
   }, [syncLivePrices]);
 
   return (
     <>
-      {/* Ambient glow — decorative, scoped to the hero */}
-      <div
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-[radial-gradient(ellipse_50%_100%_at_50%_0%,rgba(56,189,248,0.06),transparent)]"
-        aria-hidden="true"
-      />
-
-      {/* ONE cohesive card wrapping the full workstation */}
       <div
         id="workspace"
-        className="relative flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-[#0d1117]"
+        className="grid scroll-mt-16 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(360px,1fr)] xl:gap-8"
       >
-        {/* Header: mode tabs left, model + presets + minify right */}
-        <WorkstationHeader />
-
-        {/* Two-pane body */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 lg:min-h-[640px]">
-          <div className="min-w-0 border-b border-zinc-800 lg:border-b-0 lg:border-r">
-            <RawEditorPane />
-          </div>
-          <TokenInspectorPane />
+        <div id="prompt-pane" className="flex min-h-[520px] min-w-0 flex-col lg:min-h-[640px]">
+          <PromptPane />
         </div>
+        <AnswerPanel />
       </div>
 
-      {/* Global Modals & Dialogs */}
+      <MobileTally />
       <PromptDiffDialog />
       <CommandPalette />
       <SignInModal />

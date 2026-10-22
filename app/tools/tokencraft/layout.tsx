@@ -1,40 +1,36 @@
 import type { Metadata } from "next";
+import { INITIAL_MODEL_REGISTRY } from "./_lib/priceService";
+
+const MODELS = Object.keys(INITIAL_MODEL_REGISTRY).length;
+const TITLE = "Token Counter & LLM Cost Calculator for GPT, Claude, Gemini";
+const DESCRIPTION = `Count tokens and price your prompt across ${MODELS} models at live OpenRouter rates. Exact counts for GPT (o200k_base, cl100k_base), clearly marked estimates for Claude, Gemini, Llama and others. Free, no sign-up, runs in your browser.`;
 
 export const metadata: Metadata = {
-  title: "AI Tokenizer & Token Cost Calculator — TokenCraft",
-  description:
-    "Count tokens with exact OpenAI o200k and cl100k BPE encodings in your browser. See token boundaries, check context window usage, and price your prompt across 95 live models. 100% client-side, no cloud storage.",
+  title: { absolute: `${TITLE} — TokenCraft` },
+  description: DESCRIPTION,
   keywords: [
-    "tokenizer",
-    "BPE",
-    "gpt-4o tokenizer",
-    "o200k",
-    "cl100k",
-    "context window optimizer",
-    "prompt minifier",
+    "token counter",
     "LLM cost calculator",
+    "GPT token counter",
+    "Claude token counter",
+    "Gemini token calculator",
+    "tokenizer",
+    "o200k_base",
+    "cl100k_base",
+    "AI API pricing",
+    "prompt minifier",
   ],
-  alternates: {
-    canonical: "/tools/tokencraft",
-  },
+  alternates: { canonical: "/tools/tokencraft" },
   openGraph: {
     type: "website",
-    title: "AI Tokenizer & Token Cost Calculator — TokenCraft",
-    description:
-      "Inspect BPE token boundaries, context window usage, and multi-model costs in real time. Fully client-side, your text never leaves the browser.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: "/tools/tokencraft",
-    siteName: "TokenCraft",
+    siteName: "TokenCraft by Nor AI",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "AI Tokenizer & Token Cost Calculator — TokenCraft",
-    description:
-      "Exact o200k & cl100k token counting and multi-model cost projection, in your browser.",
-  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
-export default function TokenCraftLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function TokenCraftLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return children;
 }

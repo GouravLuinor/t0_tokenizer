@@ -26,7 +26,7 @@ function DemoToast({ onDismiss }: { onDismiss: () => void }) {
   return createPortal(
     <div
       role="status"
-      className="fixed bottom-6 left-1/2 z-[90] w-[min(92vw,26rem)] -translate-x-1/2 rounded-xl border border-white/10 bg-surface-elevated px-4 py-3 shadow-elevated"
+      className="fixed bottom-6 left-1/2 z-[90] w-[min(92vw,26rem)] -translate-x-1/2 rounded-lg border border-rule bg-sheet px-4 py-3 shadow-elevated"
     >
       <p className="text-sm font-medium text-zinc-100">
         Sign-in is not enabled yet
@@ -38,7 +38,7 @@ function DemoToast({ onDismiss }: { onDismiss: () => void }) {
       <button
         type="button"
         onClick={onDismiss}
-        className="mt-2.5 text-xs font-medium text-sky-400 transition-colors hover:text-sky-300"
+        className="mt-2.5 text-xs font-medium text-board underline dark:text-gold"
       >
         Dismiss
       </button>
@@ -107,15 +107,15 @@ function UserMenu({
         <button
           type="button"
           aria-label="Account menu"
-          className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-sky-400/30 bg-sky-500/10 font-mono text-xs font-bold text-sky-300 transition-colors hover:border-sky-400/60 hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50"
+          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold/50 bg-board-2 font-mono text-xs font-bold text-gold transition-colors hover:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
         >
           {initial ? (
             initial
           ) : (
-            <User className="h-4 w-4 text-sky-300" aria-hidden="true" />
+            <User className="h-4 w-4 text-gold" aria-hidden="true" />
           )}
           <span
-            className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-background bg-emerald-500"
+            className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-board bg-ok"
             aria-hidden="true"
           />
         </button>
@@ -123,14 +123,14 @@ function UserMenu({
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500">
               Signed in as
             </span>
             <span className="truncate font-mono text-xs text-zinc-200">
               {email || "User"}
             </span>
             {providerLabel && (
-              <span className="mt-1 inline-flex w-fit items-center rounded-full border border-sky-400/25 bg-sky-500/10 px-2 py-0.5 font-mono text-[10px] text-sky-300">
+              <span className="mt-1 inline-flex w-fit items-center rounded-full border border-rule bg-panel px-2 py-0.5 font-mono text-[11px] text-ink-2">
                 {providerLabel}
               </span>
             )}
@@ -139,7 +139,7 @@ function UserMenu({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => void onSignOut()}
-          className="cursor-pointer text-rose-400 hover:text-rose-300 focus:bg-rose-500/10 focus:text-rose-300"
+          className="cursor-pointer text-danger focus:bg-danger-wash"
         >
           <LogOut className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
           Log out
@@ -154,7 +154,7 @@ function SignInButtonLabel({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-lg border border-surface-border bg-surface-default px-3.5 py-2 text-xs font-medium text-zinc-200 transition-colors hover:border-surface-borderHover hover:bg-surface-elevated hover:text-zinc-50"
+      className="rounded-md px-2.5 py-1.5 text-[13px] text-board-ink-2 transition-colors hover:bg-board-2 hover:text-board-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
     >
       Sign in
     </button>

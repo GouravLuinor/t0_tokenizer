@@ -1,0 +1,127 @@
+{
+  "title": "TokenCraft: choose the visual world",
+  "question": "The roll assigned The Rate Board. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Rate Board",
+      "kicker": "THE ROLL",
+      "lineage": "bureau-de-change rate boards and bank FX displays",
+      "thesis": "One prompt, converted into what it costs on every model, at live rates.",
+      "palette": ["#0F3B2E", "#F2A93B", "#F4F5F1", "#12201B", "#E5484D"],
+      "materials": ["board-green enamel panel", "amber flap digits", "printed rate-card paper"],
+      "viewport": "Prompt on the left with token boundaries drawn on the text itself; on the right a display-size token count, fit bar and a live mini rate board of your cheapest models.",
+      "risk": "Split-flap motion turns gimmicky if it fires on every keystroke; it must roll once per settled change.",
+      "raised": [
+        {"from": "variable-font-specimen", "raise": "Hierarchy by scale alone: the token count is set at display size, replacing four equal stat tiles."},
+        {"from": "notation-diagram-systems-star-atlas", "raise": "Every board row carries a cost bar on one fixed log ramp, so cheap and costly read at a glance."},
+        {"from": "pop-culture-shelf-character-goods-catalog", "raise": "Every model row keeps the same fixed furniture: provider, context, cache tier, exact or estimate."},
+        {"from": "vernacular-ephemera-cassette-j-card", "raise": "Context fit is two sides, your input and reserved output, against a hard capacity with totals right-aligned."},
+        {"from": "crouwel-grid-specimen", "raise": "Token boundaries sit on a strict monospace cell grid, so splits line up and scan."}
+      ],
+      "html": ".impeccable/mocks/decision/assigned.html"
+    },
+    {
+      "id": "model-pick",
+      "label": "The Type Case",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "letterpress composing sticks and type cases",
+      "thesis": "Tokenizing is typesetting: your text set as sorts pulled from a 200k-piece case.",
+      "palette": ["#16130F", "#EDE6D6", "#B8322A", "#8C7B5E"],
+      "materials": ["type-metal sorts", "case-wood compartments", "proof paper"],
+      "viewport": "A composing stick runs across the top holding your prompt as sorts, each stamped with its token ID; the proof below carries count and cost.",
+      "risk": "Letterpress is a familiar craft trope and can read as costume on a fast working tool.",
+      "html": ".impeccable/mocks/decision/model-pick.html"
+    },
+    {
+      "id": "challenger-console",
+      "label": "Dark-first Console",
+      "verdict": "competitive",
+      "lineage": "digital design canon: dark developer consoles",
+      "thesis": "Graphite panels, hairline seams, syntax colours only for state.",
+      "palette": ["#16181C", "#22262C", "#7DD3FC", "#A3E635", "#F87171"],
+      "materials": ["graphite panels", "1px seams", "syntax accents"],
+      "viewport": "Tiled persistent panels: editor, token stream, cost table, with a command bar.",
+      "case": "Developers identify instantly; loses on clarity because it is what TokenCraft already looks like.",
+      "risk": "Close to the current site and to every competitor; distinction would rest on details alone.",
+      "html": ".impeccable/mocks/decision/challenger-console.html"
+    },
+    {
+      "id": "challenger-specimen",
+      "label": "Variable Font Specimen",
+      "verdict": "declined",
+      "lineage": "foundry type specimens",
+      "thesis": "A giant number that breathes as you type.",
+      "palette": ["#FAFAF7", "#111111", "#3D5AFE"],
+      "materials": ["paper", "ink"],
+      "viewport": "One enormous token count, tiny mono labels.",
+      "case": "Developers don't identify with a type foundry; the multi-model job disappears.",
+      "risk": "Pretty, but it hides the cost job.",
+      "kept": "Hierarchy by scale alone: the count goes to display size."
+    },
+    {
+      "id": "challenger-atlas",
+      "label": "Star Atlas",
+      "verdict": "declined",
+      "lineage": "celestial charts",
+      "thesis": "95 models as stars, cost as magnitude.",
+      "palette": ["#0B1530", "#F4F1E8", "#E0533D"],
+      "materials": ["chart navy", "chalk dots"],
+      "viewport": "A sky chart of models plotted by price and context.",
+      "case": "A chart nobody asked for; reading a price takes longer than in a table.",
+      "risk": "Looks like norai.tech's starfield hero, blurring the family line.",
+      "kept": "One fixed log ramp for cost bars on every row."
+    },
+    {
+      "id": "challenger-catalog",
+      "label": "Character Goods Catalog",
+      "verdict": "declined",
+      "lineage": "mascot merchandise catalogs",
+      "thesis": "Models as a ranked mascot roster.",
+      "palette": ["#FFE3EC", "#FFFFFF", "#FF5C8A"],
+      "materials": ["pastel cells", "white keylines"],
+      "viewport": "Ranked grid of model cards.",
+      "case": "Trivialises a spend decision.",
+      "risk": "Wrong register for money.",
+      "kept": "Fixed furniture on every model row."
+    },
+    {
+      "id": "challenger-jcard",
+      "label": "Cassette J-card",
+      "verdict": "declined",
+      "lineage": "mixtape inlays",
+      "thesis": "Your context window is a tape that must not overflow.",
+      "palette": ["#FFFFFF", "#1F3FA8", "#C8102E"],
+      "materials": ["lined inlay", "ballpoint"],
+      "viewport": "Side A input, side B output, running times right-aligned.",
+      "case": "Lovely fit metaphor but nostalgia over clarity.",
+      "risk": "Handwriting undermines trust in numbers.",
+      "kept": "Input and reserved output as two sides against one capacity."
+    },
+    {
+      "id": "challenger-crouwel",
+      "label": "Crouwel Grid Specimen",
+      "verdict": "declined",
+      "lineage": "Wim Crouwel grid posters",
+      "thesis": "Text built cell by cell on a visible grid.",
+      "palette": ["#FFFFFF", "#1E40FF", "#111111"],
+      "materials": ["graph-paper hairlines"],
+      "viewport": "Prompt glyphs on a visible construction grid.",
+      "case": "A poster, not a tool.",
+      "risk": "Grid ornament competes with tokens.",
+      "kept": "Token boundaries on a strict mono cell grid."
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "tiktokenizer-style two panes: text left, coloured token chips right, count on top.",
+    "palette": ["#FFFFFF", "#111827", "#6366F1"],
+    "materials": ["white panes", "pastel token chips"],
+    "viewport": "Model select, textarea, chip stream, a count badge.",
+    "risk": "Indistinguishable from the competition by design.",
+    "html": ".impeccable/mocks/decision/canon.html"
+  },
+  "steer": true
+}

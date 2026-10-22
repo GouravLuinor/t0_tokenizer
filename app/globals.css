@@ -2,170 +2,207 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * TokenCraft — "The Rate Board"
+ * Board-green enamel owns the bar and the boards; amber figures are reserved
+ * for money and live rates; the workspace is cool rate-card paper (light) or
+ * deep board-green-black (dark). Colours are RGB channels so Tailwind's
+ * opacity modifiers keep working.
+ */
 @layer base {
   :root {
-    --background: 240 5.9% 4%;
-    --foreground: 0 0% 98%;
-    --radius: 0.5rem;
-    --border-subtle: #202B46;
-    --border-active: #32436D;
+    color-scheme: light;
+    --paper: 243 245 241;
+    --sheet: 255 255 255;
+    --panel: 233 237 231;
+    --ink: 19 32 26;
+    --ink-2: 61 77 69;
+    --ink-3: 88 104 96;
+    --rule: 211 218 210;
+    --rule-2: 182 193 184;
+
+    --board: 15 59 46;
+    --board-2: 21 72 57;
+    --board-rule: 33 86 69;
+    --board-ink: 228 237 232;
+    --board-ink-2: 165 192 179;
+    --gold: 242 169 59;
+    --gold-ink: 134 84 0;
+    --gold-wash: 252 236 205;
+
+    --ok: 31 122 77;
+    --warn: 158 96 0;
+    --danger: 190 50 44;
+    --danger-wash: 251 228 226;
+    --focus: 15 59 46;
+
+    /* Token boundary underlines, cycled per token */
+    --tk-0: 63 140 110;
+    --tk-1: 206 134 26;
+    --tk-2: 74 122 176;
+    --tk-3: 160 86 140;
+
+    /* Legacy zinc scale, remapped so older dialogs follow the theme */
+    --z-50: 14 26 21;
+    --z-100: 19 32 26;
+    --z-200: 36 51 44;
+    --z-300: 52 68 60;
+    --z-400: 72 88 80;
+    --z-500: 92 108 100;
+    --z-600: 132 146 138;
+    --z-700: 183 193 186;
+    --z-800: 211 218 210;
+    --z-900: 233 237 231;
+    --z-950: 246 248 244;
   }
 
-  * {
-    border-color: #202B46;
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --paper: 10 19 16;
+    --sheet: 14 25 21;
+    --panel: 16 30 25;
+    --ink: 227 236 231;
+    --ink-2: 176 193 184;
+    --ink-3: 136 156 146;
+    --rule: 32 49 43;
+    --rule-2: 49 70 62;
+
+    --board: 15 59 46;
+    --board-2: 20 70 55;
+    --board-rule: 36 90 72;
+    --board-ink: 228 237 232;
+    --board-ink-2: 165 192 179;
+    --gold: 242 169 59;
+    --gold-ink: 242 169 59;
+    --gold-wash: 60 44 18;
+
+    --ok: 92 199 140;
+    --warn: 236 170 70;
+    --danger: 244 112 104;
+    --danger-wash: 64 24 22;
+    --focus: 242 169 59;
+
+    --tk-0: 92 186 148;
+    --tk-1: 232 164 64;
+    --tk-2: 110 160 220;
+    --tk-3: 206 128 186;
+
+    --z-50: 246 249 247;
+    --z-100: 227 236 231;
+    --z-200: 206 218 211;
+    --z-300: 186 200 192;
+    --z-400: 150 168 158;
+    --z-500: 120 138 128;
+    --z-600: 82 100 92;
+    --z-700: 49 70 62;
+    --z-800: 32 49 43;
+    --z-900: 16 30 25;
+    --z-950: 10 19 16;
   }
 
   html {
-    color-scheme: dark;
+    background: rgb(var(--paper));
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--rule-2)) transparent;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background-color: #09090B;
-    color: #FAFAFA;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
+    background: rgb(var(--paper));
+    color: rgb(var(--ink));
+    font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.01em;
   }
 
   ::selection {
-    background: rgba(16, 185, 129, 0.25);
-    color: #FFFFFF;
+    background: rgb(var(--gold) / 0.35);
+    color: rgb(var(--ink));
+  }
+
+  textarea,
+  input {
+    caret-color: rgb(var(--gold-ink));
+  }
+
+  a {
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--focus));
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--rule-2));
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 }
 
-/* Glass edge highlight on elevated surfaces */
-.glass-edge {
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.35);
-}
-
-.glass-edge-subtle {
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
-}
-
-/* House keyboard-focus indicator — apply wherever native outline is suppressed */
 @layer utilities {
   .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .board-scroll {
+    scrollbar-color: rgb(var(--board-rule)) transparent;
   }
 }
 
-/* Custom Clean Obsidian Scrollbar */
-/* Firefox parity — scrollbar-color inherits to all nested scroll containers */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: #202B46 transparent;
+/* Token boundaries drawn under the editor text, cycled across four inks */
+.tk {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  text-decoration-skip-ink: none;
+}
+.tk-0 { text-decoration-color: rgb(var(--tk-0)); }
+.tk-1 { text-decoration-color: rgb(var(--tk-1)); }
+.tk-2 { text-decoration-color: rgb(var(--tk-2)); }
+.tk-3 { text-decoration-color: rgb(var(--tk-3)); }
+.tk-at {
+  background: rgb(var(--gold) / 0.28);
+  border-radius: 3px;
 }
 
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
+/* Token chips (stream view) */
+.chip-0 { background: rgb(var(--tk-0) / 0.14); box-shadow: inset 0 -2px 0 rgb(var(--tk-0)); }
+.chip-1 { background: rgb(var(--tk-1) / 0.14); box-shadow: inset 0 -2px 0 rgb(var(--tk-1)); }
+.chip-2 { background: rgb(var(--tk-2) / 0.14); box-shadow: inset 0 -2px 0 rgb(var(--tk-2)); }
+.chip-3 { background: rgb(var(--tk-3) / 0.14); box-shadow: inset 0 -2px 0 rgb(var(--tk-3)); }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #202B46;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #32436D;
-}
-
-/* 5-Color Calibrated BPE Token Boundary Classes - Restrained & Functional */
-.bpe-token-0 {
-  background-color: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.16);
-  color: #6EE7B7;
-}
-
-.bpe-token-1 {
-  background-color: rgba(6, 182, 212, 0.15);
-  border: 1px solid rgba(6, 182, 212, 0.16);
-  color: #67E8F9;
-}
-
-.bpe-token-2 {
-  background-color: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.16);
-  color: #C4B5FD;
-}
-
-.bpe-token-3 {
-  background-color: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.16);
-  color: #FCD34D;
-}
-
-.bpe-token-4 {
-  background-color: rgba(244, 63, 94, 0.15);
-  border: 1px solid rgba(244, 63, 94, 0.16);
-  color: #FDA4AF;
-}
-
-/* Text Shimmer Effect */
-@keyframes text-shine {
-  0% {
-    background-position: 100% 50%;
+/* The signature move: a figure rolls in once when a settled change re-prices it */
+@keyframes roll-in {
+  from {
+    transform: translateY(-55%);
+    opacity: 0;
+    filter: blur(1.5px);
   }
-  100% {
-    background-position: 0% 50%;
+  to {
+    transform: translateY(0);
+    opacity: 1;
+    filter: blur(0);
   }
 }
-
-.shiny-text {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.95) 50%,
-    rgba(255, 255, 255, 0.4) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: text-shine 4s ease-in-out infinite;
+.roll {
+  display: inline-block;
+  animation: roll-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
-.shiny-text-emerald {
-  background: linear-gradient(
-    90deg,
-    rgba(16, 185, 129, 0.5) 0%,
-    rgba(52, 211, 153, 1) 50%,
-    rgba(16, 185, 129, 0.5) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: text-shine 3s ease-in-out infinite;
-}
-
-.shiny-text-cyan {
-  background: linear-gradient(
-    90deg,
-    rgba(56, 189, 248, 0.5) 0%,
-    rgba(6, 182, 212, 1) 50%,
-    rgba(56, 189, 248, 0.5) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: text-shine 3s ease-in-out infinite;
-}
-
-/* Accessibility: Honor reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .roll {
+    animation: none;
   }
 }

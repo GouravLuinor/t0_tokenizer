@@ -9,6 +9,26 @@ import type {
 } from "../_lib/tokenizeTypes";
 import { mapStatsToStorePatch } from "../_lib/tokenizeTypes";
 import { getCurrentModel } from "../_lib/modelRegistry";
+import type { TokenizerEncoding } from "../_lib/tokenizeTypes";
+
+/**
+ * One-off counts (e.g. "how many tokens would the minified prompt be?")
+ * share the live worker. They use negative ids so they can never be mistaken
+ * for, or supersede, the editor's own requests.
+ */
+let oneOffId = 0;
+const pendingCounts = new Map<number, (count: number) => void>();
+let countWithWorker: ((text: string, encoding: TokenizerEncoding) => Promise<number>) | null = null;
+
+export async function countTokens(
+  text: string,
+  encoding: TokenizerEncoding
+): Promise<number> {
+  if (!text) return 0;
+  if (countWithWorker) return countWithWorker(text, encoding);
+  const { tokenizeTextSafe } = await import("../_lib/tokenize");
+  return tokenizeTextSafe(text, encoding)?.count ?? 0;
+}
 
 /**
  * Owns the tokenization pipeline: debounced dispatch to the Web Worker,
@@ -28,6 +48,7 @@ export function useTokenizer() {
   const workerRef = useRef<Worker | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestRequestIdRef = useRef(0);
+  const latestTextRef = useRef<string | null>(null);
 
   /**
    * Wire format ({tokens, count}) is translated to the store schema
@@ -36,7 +57,11 @@ export function useTokenizer() {
    */
   const applyStats = useCallback(
     (stats: TokenizeStats) => {
-      setTokenData({ ...mapStatsToStorePatch(stats), isProcessing: false });
+      setTokenData({
+        ...mapStatsToStorePatch(stats),
+        tokenizedText: latestTextRef.current,
+        isProcessing: false,
+      });
     },
     [setTokenData]
   );
@@ -75,6 +100,12 @@ export function useTokenizer() {
       );
 
       worker.onmessage = (e: MessageEvent<TokenizeResponse>) => {
+        const resolveCount = pendingCounts.get(e.data.id);
+        if (resolveCount) {
+          pendingCounts.delete(e.data.id);
+          resolveCount(e.data.count);
+          return;
+        }
         // Drop stale responses from superseded requests
         if (e.data.id !== latestRequestIdRef.current) return;
         applyStats(e.data);
@@ -84,6 +115,9 @@ export function useTokenizer() {
         // Worker died at runtime — recompute the current text inline
         worker.terminate();
         workerRef.current = null;
+        countWithWorker = null;
+        pendingCounts.forEach((resolve) => resolve(0));
+        pendingCounts.clear();
         setWorkerDegraded(true);
         const state = useTokenCraftStore.getState();
         runInline(
@@ -93,6 +127,12 @@ export function useTokenizer() {
       };
 
       workerRef.current = worker;
+      countWithWorker = (text, encoding) =>
+        new Promise((resolve) => {
+          const id = --oneOffId;
+          pendingCounts.set(id, resolve);
+          worker.postMessage({ id, text, encoding } satisfies TokenizeRequest);
+        });
       setWorkerDegraded(false);
     } catch {
       console.warn("Web Worker unavailable — using main-thread tokenizer.");
@@ -103,6 +143,7 @@ export function useTokenizer() {
     return () => {
       workerRef.current?.terminate();
       workerRef.current = null;
+      countWithWorker = null;
     };
   }, [applyStats, runInline, setWorkerDegraded]);
 
@@ -117,6 +158,7 @@ export function useTokenizer() {
       // Enter processing state only when real work is dispatched
       // (prevents "Computing…" shimmer flicker between keystrokes)
       const requestId = ++latestRequestIdRef.current;
+      latestTextRef.current = rawText;
       const encoding = getCurrentModel(
         useTokenCraftStore.getState().modelsRegistry,
         selectedModel

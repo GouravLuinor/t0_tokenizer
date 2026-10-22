@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-const EDITOR = "Raw prompt text input";
+const EDITOR = "Your prompt";
+const COUNT = "#answer-panel [aria-live=polite]";
 
 test.describe("TokenCraft Core Flows", () => {
   test.beforeEach(async ({ page }) => {
@@ -8,99 +9,76 @@ test.describe("TokenCraft Core Flows", () => {
     await expect(page.getByLabel(EDITOR)).toBeVisible();
   });
 
-  test("typing text produces token chips and live counts", async ({
-    page,
-  }) => {
+  test("typing text updates the count and underlines tokens in place", async ({ page }) => {
     const editor = page.getByLabel(EDITOR);
     await editor.fill("");
-    await editor.pressSequentially("The quick brown fox jumps", {
-      delay: 20,
-    });
+    await editor.pressSequentially("The quick brown fox jumps", { delay: 20 });
 
-    // Token count badge becomes non-zero and announces politely.
-    // Retry until a non-zero digit appears — the NumberTicker spring animates
-    // from 0 and the first tokenize pass pays one-time encoder init cost.
-    const badge = page.locator('[aria-live="polite"]');
-    await expect(badge).toContainText(/Token/);
-    await expect(badge).toContainText(/[1-9]/);
-
-    // Chips render in the stream
-    await expect(page.locator('button[tabindex="-1"]').first()).toBeVisible();
+    await expect(page.locator(COUNT).first()).toHaveText("5");
+    await expect(page.locator("[data-t]").first()).toBeVisible();
   });
 
-  test("clearing the editor reveals empty states", async ({ page }) => {
-    await page.getByRole("button", { name: "Clear input text" }).click();
-    await expect(page.getByText("No Tokens Generated")).toBeVisible();
-    await expect(
-      page.getByPlaceholder(/Paste or drop your raw prompt/)
-    ).toHaveValue("");
+  test("clearing the prompt shows the samples, not a broken state", async ({ page }) => {
+    await page.getByRole("button", { name: "Clear the prompt" }).click();
+    await expect(page.getByLabel(EDITOR)).toHaveValue("");
+    await expect(page.getByText("Try a sample:")).toBeVisible();
+    await expect(page.locator(COUNT).first()).toHaveText("0");
   });
 
-  test("view mode toggles expose heatmap legend and ID labels", async ({
-    page,
-  }) => {
-    // Default preset guarantees a populated stream.
-    // Accessible names come from the visible labels, not the title tooltips.
-    await page.getByRole("button", { name: "Bytes", exact: true }).click();
-    await expect(
-      page.getByLabel("Heatmap legend: bytes per token")
-    ).toBeVisible();
+  test("view tabs expose the heatmap legend and ID labels", async ({ page }) => {
+    await page.getByRole("tab", { name: "Bytes", exact: true }).click();
+    await expect(page.getByLabel("Heatmap legend: bytes per token")).toBeVisible();
 
-    await page.getByRole("button", { name: "IDs", exact: true }).click();
-    await expect(page.locator('button[tabindex="-1"]').first()).toHaveText(
-      /^#\d+$/
-    );
+    await page.getByRole("tab", { name: "IDs", exact: true }).click();
+    await expect(page.locator('button[tabindex="-1"]').first()).toHaveText(/^\d+$/);
   });
 
-  test("command palette opens via Cmd+K, executes minify flow", async ({
-    page,
-  }) => {
+  test("command palette runs the minify flow and resets its query", async ({ page }) => {
     await page.keyboard.press("ControlOrMeta+k");
-    const palette = page.getByRole("dialog", { name: "Command Palette" });
+    const palette = page.getByRole("dialog", { name: "Commands" });
     await expect(palette).toBeVisible();
-    await expect(
-      page.getByPlaceholder("Type a command or search actions…")
-    ).toBeFocused();
+    const search = page.getByPlaceholder("Search actions, views, samples and models");
+    await expect(search).toBeFocused();
 
     await page.keyboard.type("minify");
     await page.keyboard.press("Enter");
 
-    // Scope to the diff dialog specifically — the palette closes as the
-    // diff opens, so a global dialog query races both transitions
-    const diffDialog = page.getByRole("dialog", {
-      name: "Prompt Minification & AST Diff Inspector",
-    });
+    const diffDialog = page.getByRole("dialog", { name: "Minify the prompt" });
     await expect(diffDialog).toBeVisible();
+    // Savings are reported in real tokens once counted
+    await expect(diffDialog).toContainText(/tokens/);
 
-    // Escape dismisses it
     await page.keyboard.press("Escape");
     await expect(diffDialog).not.toBeVisible();
 
-    // Palette relaunch starts with a fresh query surface (regression guard)
     await page.keyboard.press("ControlOrMeta+k");
     await expect(palette).toBeVisible();
-    const search = page.getByPlaceholder("Type a command or search actions…");
     await expect(search).toHaveValue("");
     await page.keyboard.type("minify");
     await page.keyboard.press("Enter");
     await expect(diffDialog).toBeVisible();
   });
 
-  test("Cmd+M triggers the minify dialog directly", async ({ page }) => {
+  test("Cmd+M opens the minify dialog directly", async ({ page }) => {
+    await page.locator("body").click({ position: { x: 5, y: 300 } });
     await page.keyboard.press("ControlOrMeta+m");
-    await expect(
-      page.getByText("Prompt Minification & AST Diff Inspector")
-    ).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Minify the prompt" })).toBeVisible();
   });
 
-  test("model selector switches active model", async ({ page }) => {
-    await page
-      .getByRole("button", { name: /Select Tokenizer Model/ })
-      .click();
-    await page.getByRole("menuitemradio").or(page.getByRole("menuitem")).last().click();
-    // Gauge reflects whichever model is now active without erroring
-    await expect(
-      page.getByRole("region", { name: "Context Window Safety Gauge" })
-    ).toBeVisible();
+  test("model picker switches the model and the precision stamp follows", async ({ page }) => {
+    await page.getByRole("button", { name: /Change model/ }).click();
+    await page.getByRole("combobox").fill("gpt");
+    await page.getByRole("option").first().click();
+    await expect(page.getByRole("button", { name: /Model: .*GPT|Model: gpt/i })).toBeVisible();
+    await expect(page.locator("#answer-panel").getByText("Exact", { exact: true })).toBeVisible();
+  });
+
+  test("rate board row click selects that model", async ({ page }) => {
+    const board = page.locator("#rate-board");
+    await board.scrollIntoViewIfNeeded();
+    const row = board.locator("tbody tr").nth(2);
+    const name = (await row.locator("td button > span > span.truncate").first().innerText()).trim();
+    await row.click();
+    await expect(page.getByRole("button", { name: `Model: ${name}. Change model` })).toBeVisible();
   });
 });

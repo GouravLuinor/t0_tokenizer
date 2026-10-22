@@ -7,34 +7,33 @@ test.describe("TokenCraft Smoke Tests", () => {
     await expect(page.locator("body")).toBeVisible();
   });
 
-  test("loads workstation and verifies UI controls", async ({ page }) => {
+  test("first viewport carries the prompt, the count and the fit", async ({ page }) => {
     await page.goto("/tools/tokencraft");
-    await expect(page.locator("body")).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "Context Window Safety Gauge" })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Token counter/i);
+    await expect(page.getByLabel("Your prompt")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Context window" })).toBeVisible();
+    // Never a fake zero: the count resolves from "Counting…" to a real number
+    await expect(page.locator("#answer-panel [aria-live=polite]").first()).toHaveText(/^[1-9][\d,]*$/);
   });
 
-  test("full-bleed layout regression at 2560x1440", async ({ page }) => {
-    await page.setViewportSize({ width: 2560, height: 1440 });
-    await page.goto("/tools/tokencraft");
-    await expect(
-      page.getByRole("region", { name: "Context Window Safety Gauge" })
-    ).toBeVisible();
-
-    // The workstation main must span at least viewport width minus the
-    // largest horizontal padding allowance (xl:px-10 = 40px per side)
-    const main = page.locator("main");
-    const box = await main.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.width).toBeGreaterThanOrEqual(2560 - 100);
+  test("layout stays within the viewport at 2560 and 390 wide", async ({ page }) => {
+    for (const [width, height] of [
+      [2560, 1440],
+      [390, 844],
+    ]) {
+      await page.setViewportSize({ width, height });
+      await page.goto("/tools/tokencraft");
+      await expect(page.getByLabel("Your prompt")).toBeVisible();
+      const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+      expect(scrollWidth).toBeLessThanOrEqual(width);
+    }
   });
 
   test("Cmd+K palette opens and closes", async ({ page }) => {
     await page.goto("/tools/tokencraft");
-    await expect(page.getByLabel("Raw prompt text input")).toBeVisible();
+    await expect(page.getByLabel("Your prompt")).toBeVisible();
 
-    const palette = page.getByRole("dialog", { name: "Command Palette" });
+    const palette = page.getByRole("dialog", { name: "Commands" });
     await page.keyboard.press("ControlOrMeta+k");
     await expect(palette).toBeVisible();
 

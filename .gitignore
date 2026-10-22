@@ -47,3 +47,6 @@ t0_ideas.md
 # Playwright artifacts
 /test-results/
 /playwright-report/
+
+# impeccable scratch
+/.impeccable/questions/

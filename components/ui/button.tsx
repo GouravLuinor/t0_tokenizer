@@ -22,21 +22,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center gap-2 font-medium transition-[background-color,border-color,color,transform] duration-150 select-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] motion-reduce:transition-none touch-manipulation";
+      "inline-flex items-center justify-center gap-2 font-medium transition-[background-color,border-color,color,transform] duration-150 select-none rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] motion-reduce:transition-none touch-manipulation";
 
     const variantStyles = {
       default:
-        "bg-zinc-100 text-zinc-950 hover:bg-white border border-transparent shadow-sm focus-visible:ring-zinc-400",
+        "bg-board text-board-ink hover:bg-board-2 border border-transparent",
       outline:
-        "bg-surface-default text-zinc-200 border border-surface-border hover:bg-surface-elevated hover:border-surface-borderHover hover:text-white focus-visible:ring-zinc-400",
+        "bg-sheet text-ink border border-rule hover:border-rule-2 hover:bg-panel",
       ghost:
-        "bg-transparent text-zinc-400 hover:text-zinc-100 hover:bg-surface-elevated focus-visible:ring-zinc-600",
+        "bg-transparent text-ink-2 hover:text-ink hover:bg-panel",
       cyan:
-        "bg-surface-elevated text-zinc-100 border border-surface-border hover:bg-surface-default hover:border-surface-borderHover focus-visible:ring-zinc-400",
+        "bg-panel text-ink border border-rule hover:border-rule-2",
       emerald:
-        "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 focus-visible:ring-emerald-500/40",
+        "bg-gold text-board hover:brightness-105 border border-transparent",
       danger:
-        "bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 focus-visible:ring-rose-500/40",
+        "bg-danger-wash text-danger border border-danger/30 hover:border-danger/60",
     };
 
     const sizeStyles = {

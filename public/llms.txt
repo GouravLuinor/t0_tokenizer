@@ -17,6 +17,6 @@
 - [Nor AI](https://norai.tech)
 - [SchemaCraft](https://schema.norai.tech): JSON to Zod, Pydantic and TypeScript types
 - [RegexCraft](https://regex.norai.tech): regex tester with plain-English explanations
-- [Judgewright](https://judgewright.norai.tech): calibrate your LLM judge against human labels
+- [Judgewright](https://judge.norai.tech): calibrate your LLM judge against human labels
 - [Anchorflow](https://anchor.norai.tech): pin and audit GitHub Actions workflows
 - [Smart Rozgar](https://rozgar.norai.tech): Sarkari job alerts in Hindi and English

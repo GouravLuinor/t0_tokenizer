@@ -4,7 +4,7 @@ import { Wordmark } from "./TopBar";
 const FAMILY = [
   ["SchemaCraft", "JSON to Zod, Pydantic and TypeScript types", "https://schema.norai.tech"],
   ["RegexCraft", "Regex tester with plain-English explanations", "https://regex.norai.tech"],
-  ["Judgewright", "Calibrate your LLM judge against human labels", "https://judgewright.norai.tech"],
+  ["Judgewright", "Calibrate your LLM judge against human labels", "https://judge.norai.tech"],
   ["Anchorflow", "Pin and audit GitHub Actions workflows", "https://anchor.norai.tech"],
   ["Smart Rozgar", "Sarkari job alerts in Hindi and English", "https://rozgar.norai.tech"],
 ];

@@ -61,7 +61,7 @@ export function PromptDiffDialog() {
                 Removes formatting the model does not need. Wording is never changed. Review it before you apply.
               </DialogDescription>
             </div>
-            <p className="font-display text-[34px] font-semibold leading-none text-ink tnum" aria-live="polite">
+            <p className="font-display text-[36px] font-semibold leading-none text-ink tnum" aria-live="polite">
               {unchanged ? (
                 <span className="text-[18px] text-ink-3">Nothing to remove</span>
               ) : saved === null ? (
@@ -101,7 +101,7 @@ export function PromptDiffDialog() {
                 <span className="font-medium text-ink">{label}</span>
                 <span className="font-mono text-ink-3 tnum">{meta}</span>
               </div>
-              <pre className="h-[240px] overflow-auto whitespace-pre-wrap break-words px-6 pb-4 font-mono text-[12.5px] leading-relaxed text-ink-2 md:h-[360px]">
+              <pre className="h-[240px] overflow-auto whitespace-pre-wrap break-words px-6 pb-4 font-mono text-[13px] leading-relaxed text-ink-2 md:h-[360px]">
                 {text}
               </pre>
             </div>

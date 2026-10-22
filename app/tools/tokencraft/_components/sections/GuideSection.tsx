@@ -8,7 +8,7 @@ const TOC = [
   ["how-we-price", "How TokenCraft prices a call"],
 ];
 
-const h3 = "scroll-mt-20 font-display text-[26px] font-semibold uppercase leading-tight tracking-[0.02em] text-ink";
+const h3 = "scroll-mt-20 font-display text-[28px] font-semibold uppercase leading-tight tracking-[0.02em] text-ink";
 const p = "mt-3 text-[16px] leading-[1.7] text-ink-2";
 
 /** The long-form guide: written for reading, with one live demo. */

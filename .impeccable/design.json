@@ -1,0 +1,304 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-10-22T06:18:03Z",
+ "title": "Design System: TokenCraft",
+ "extensions": {
+  "colorMeta": {
+   "board-green": {
+    "role": "primary",
+    "displayName": "Board Green Enamel",
+    "canonical": "rgb(15 59 46)",
+    "tonalRamp": [
+     "oklch(15% 0.06 163)",
+     "oklch(25% 0.06 163)",
+     "oklch(35% 0.06 163)",
+     "oklch(45% 0.06 163)",
+     "oklch(55% 0.06 163)",
+     "oklch(65% 0.06 163)",
+     "oklch(80% 0.06 163)",
+     "oklch(95% 0.06 163)"
+    ]
+   },
+   "rate-amber": {
+    "role": "secondary",
+    "displayName": "Rate Amber",
+    "canonical": "rgb(242 169 59)",
+    "tonalRamp": [
+     "oklch(15% 0.15 70)",
+     "oklch(25% 0.15 70)",
+     "oklch(35% 0.15 70)",
+     "oklch(45% 0.15 70)",
+     "oklch(55% 0.15 70)",
+     "oklch(65% 0.15 70)",
+     "oklch(80% 0.15 70)",
+     "oklch(95% 0.15 70)"
+    ]
+   },
+   "paper": {
+    "role": "neutral",
+    "displayName": "Cool Rate-Card Paper",
+    "canonical": "rgb(243 245 241)",
+    "tonalRamp": [
+     "oklch(15% 0.008 140)",
+     "oklch(25% 0.008 140)",
+     "oklch(35% 0.008 140)",
+     "oklch(45% 0.008 140)",
+     "oklch(55% 0.008 140)",
+     "oklch(65% 0.008 140)",
+     "oklch(80% 0.008 140)",
+     "oklch(95% 0.008 140)"
+    ]
+   },
+   "ink": {
+    "role": "neutral",
+    "displayName": "Green-Black Ink",
+    "canonical": "rgb(19 32 26)",
+    "tonalRamp": [
+     "oklch(15% 0.02 160)",
+     "oklch(25% 0.02 160)",
+     "oklch(35% 0.02 160)",
+     "oklch(45% 0.02 160)",
+     "oklch(55% 0.02 160)",
+     "oklch(65% 0.02 160)",
+     "oklch(80% 0.02 160)",
+     "oklch(95% 0.02 160)"
+    ]
+   },
+   "token-green": {
+    "role": "tertiary",
+    "displayName": "Token Ink Green"
+   },
+   "token-amber": {
+    "role": "tertiary",
+    "displayName": "Token Ink Amber"
+   },
+   "token-blue": {
+    "role": "tertiary",
+    "displayName": "Token Ink Blue"
+   },
+   "token-plum": {
+    "role": "tertiary",
+    "displayName": "Token Ink Plum"
+   }
+  },
+  "typographyMeta": {
+   "figure-xl": {
+    "displayName": "Figure Xl"
+   },
+   "figure-lg": {
+    "displayName": "Figure Lg"
+   },
+   "figure": {
+    "displayName": "Figure"
+   },
+   "display": {
+    "displayName": "Display"
+   },
+   "display-md": {
+    "displayName": "Display Md"
+   },
+   "display-sm": {
+    "displayName": "Display Sm"
+   },
+   "headline": {
+    "displayName": "Headline"
+   },
+   "headline-sm": {
+    "displayName": "Headline Sm"
+   },
+   "title": {
+    "displayName": "Title"
+   },
+   "tally": {
+    "displayName": "Tally"
+   },
+   "lead": {
+    "displayName": "Lead"
+   },
+   "board-label": {
+    "displayName": "Board Label"
+   },
+   "reading": {
+    "displayName": "Reading"
+   },
+   "body": {
+    "displayName": "Body"
+   },
+   "ui": {
+    "displayName": "Ui"
+   },
+   "label": {
+    "displayName": "Label"
+   },
+   "rate": {
+    "displayName": "Rate"
+   },
+   "editor": {
+    "displayName": "Editor"
+   },
+   "meta": {
+    "displayName": "Meta"
+   },
+   "caption": {
+    "displayName": "Caption"
+   }
+  },
+  "shadows": [
+   {
+    "name": "elevated",
+    "value": "0 12px 32px -8px rgb(var(--ink) / 0.18), 0 2px 6px rgb(var(--ink) / 0.06)",
+    "purpose": "Answer card, minifier card, popovers, dialogs."
+   },
+   {
+    "name": "board",
+    "value": "inset 0 1px 0 rgb(255 255 255 / 0.06), 0 10px 30px -12px rgb(var(--board) / 0.55)",
+    "purpose": "Green boards sitting on paper."
+   }
+  ],
+  "motion": [
+   {
+    "name": "roll-in",
+    "value": "260ms cubic-bezier(0.16, 1, 0.3, 1)",
+    "purpose": "Changed characters of a re-priced figure roll in once; none under reduced motion."
+   },
+   {
+    "name": "settle",
+    "value": "220ms",
+    "purpose": "Debounce before a figure rolls, so typing does not animate."
+   }
+  ],
+  "breakpoints": [
+   {
+    "name": "sm",
+    "value": "640px"
+   },
+   {
+    "name": "md",
+    "value": "768px"
+   },
+   {
+    "name": "lg",
+    "value": "1024px"
+   },
+   {
+    "name": "container",
+    "value": "1440px"
+   }
+  ]
+ },
+ "components": [
+  {
+   "name": "Primary Button",
+   "kind": "button",
+   "refersTo": "button-primary",
+   "description": "Board-green action, e.g. Minify, Review the changes.",
+   "html": "<button class=\"ds-btn-primary\">Review the changes</button>",
+   "css": ".ds-btn-primary{background:#0F3B2E;color:#E4EDE8;height:40px;padding:0 16px;border:0;border-radius:6px;font:500 14px Geist,system-ui,sans-serif;transition:background .15s}.ds-btn-primary:hover{background:#154839}.ds-btn-primary:focus-visible{outline:2px solid #0F3B2E;outline-offset:2px}"
+  },
+  {
+   "name": "Rate CTA",
+   "kind": "button",
+   "refersTo": "button-rate",
+   "description": "The one amber call to action per page.",
+   "html": "<button class=\"ds-btn-rate\">Count a prompt for Claude Sonnet 5.5</button>",
+   "css": ".ds-btn-rate{background:#F2A93B;color:#1D1400;height:44px;padding:0 20px;border:0;border-radius:6px;font:600 15px Geist,system-ui,sans-serif}.ds-btn-rate:hover{background:#F6B955}.ds-btn-rate:focus-visible{outline:2px solid #E4EDE8;outline-offset:2px}"
+  },
+  {
+   "name": "Precision Stamps",
+   "kind": "chip",
+   "refersTo": "stamp-exact",
+   "description": "Exact vs ≈ Estimate, beside every count.",
+   "html": "<span class=\"ds-stamp ds-exact\">Exact</span> <span class=\"ds-stamp ds-est\">≈ Estimate</span>",
+   "css": ".ds-stamp{display:inline-block;padding:2px 6px;border-radius:3px;font:11px 'Geist Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.04em}.ds-exact{background:#0F3B2E;color:#E4EDE8}.ds-est{background:#FCECCD;color:#865400}"
+  },
+  {
+   "name": "Segmented Control",
+   "kind": "custom",
+   "refersTo": "segmented-on",
+   "description": "Reply ratio and call volume pickers.",
+   "html": "<div class=\"ds-seg\"><button>0×</button><button class=\"on\">0.5×</button><button>1×</button><button>2×</button></div>",
+   "css": ".ds-seg{display:flex;padding:2px;border:1px solid #D3DAD2;border-radius:6px;background:#F3F5F1}.ds-seg button{flex:1;border:0;background:none;padding:4px 6px;border-radius:5px;font:12px 'Geist Mono',monospace;color:#3D4D45;cursor:pointer}.ds-seg button:hover{color:#13201A}.ds-seg .on{background:#0F3B2E;color:#E4EDE8}"
+  },
+  {
+   "name": "Search Field",
+   "kind": "input",
+   "refersTo": "input-search",
+   "description": "Token, model and board search.",
+   "html": "<input class=\"ds-input\" placeholder=\"Search models\">",
+   "css": ".ds-input{height:32px;padding:0 10px;border:1px solid #D3DAD2;border-radius:6px;background:#fff;color:#13201A;font:13px Geist,system-ui,sans-serif;outline:none}.ds-input:focus{border-color:#0F3B2E}"
+  },
+  {
+   "name": "Rate Board Row",
+   "kind": "custom",
+   "refersTo": "",
+   "description": "Model, rates, fixed-log cost ramp, amber price.",
+   "html": "<div class=\"ds-row\"><span class=\"ds-name\">Claude Haiku 5.5<small>Anthropic</small></span><span class=\"ds-ramp\"><i style=\"width:38%\"></i></span><span class=\"ds-price\">$0.00041</span></div>",
+   "css": ".ds-row{display:grid;grid-template-columns:1fr 80px 90px;gap:12px;align-items:center;padding:8px 16px;background:#0F3B2E;color:#E4EDE8;border-bottom:1px solid #215645;font:500 13px Geist,sans-serif}.ds-row:hover{background:#154839}.ds-name small{display:block;font-size:11px;color:#A5C0B3;font-weight:400}.ds-ramp{height:6px;border-radius:9999px;background:#215645}.ds-ramp i{display:block;height:6px;border-radius:9999px;background:#F2A93B}.ds-price{text-align:right;font:13px 'Geist Mono',monospace;color:#F2A93B;font-variant-numeric:tabular-nums}"
+  },
+  {
+   "name": "Top Bar",
+   "kind": "nav",
+   "refersTo": "",
+   "description": "Sticky board-green bar with condensed wordmark.",
+   "html": "<nav class=\"ds-bar\"><b>TOKEN<em>CRAFT</em></b><a>Counter</a><a>Rate board</a><a>Guide</a></nav>",
+   "css": ".ds-bar{display:flex;align-items:center;gap:20px;height:56px;padding:0 24px;background:#0F3B2E;color:#E4EDE8}.ds-bar b{font:700 22px 'Barlow Condensed',sans-serif;letter-spacing:.06em}.ds-bar em{font-style:normal;color:#F2A93B}.ds-bar a{font:13px Geist,sans-serif;color:#A5C0B3;cursor:pointer}.ds-bar a:hover{color:#E4EDE8}"
+  }
+ ],
+ "narrative": {
+  "northStar": "The Rate Board",
+  "overview": "TokenCraft is a bureau-de-change board for prompts. You hand it text, and it posts what that text costs on every model, in amber figures on green enamel, stamped with the time the rates were taken. The workspace around the board is cool rate-card paper in light mode and deep board-green-black at night. Everything that is not a price or a live rate stays quiet, so the figures carry the page.\n\nDensity is that of a working instrument, not a dashboard. The first viewport is one flow: the prompt on the left with token boundaries underlined on the text itself, and on the right the answer, which is one big count, three money figures, a fit bar and a five-row mini board. There are no stat-tile grids and no equal-weight panels. Below the fold the page changes register to reading: the full rate board as a full-bleed green section, then the minifier, comparison, guide and FAQ set on paper.\n\nThe system refuses glass, glow and gradient text, and it never fakes a material. The \"board\" is flat enamel colour and hairline rules, not a skeuomorphic split-flap.",
+  "keyCharacteristics": [
+   "Board-green owns the chrome (top bar, rate boards, footer); paper owns the work.",
+   "Amber is money. If it is amber, it is a price, a rate or the live-rates stamp.",
+   "Condensed uppercase display type for board labels and headings; mono for tokens and rates.",
+   "One fixed log cost ramp shared by every row on every board.",
+   "Every count says how sure it is: an Exact stamp or a ≈ Estimate stamp."
+  ],
+  "rules": [
+   {
+    "name": "The Amber Is Money Rule",
+    "body": "Amber appears only on prices, rates, cost ramps and the live-rates stamp. A decorative amber accent breaks the board's one promise.",
+    "section": "colors"
+   },
+   {
+    "name": "The Two Grounds Rule",
+    "body": "Green enamel is chrome and boards; paper is work and reading. Never set long-form reading on green, and never put the editor on green.",
+    "section": "colors"
+   },
+   {
+    "name": "The Tabular Figures Rule",
+    "body": "Every number that can change uses tabular numerals so re-pricing never shifts a column.",
+    "section": "typography"
+   },
+   {
+    "name": "The Sentence-Case Controls Rule",
+    "body": "Uppercase belongs to the condensed display face only. Buttons, labels and tabs are sentence case in Geist.",
+    "section": "typography"
+   },
+   {
+    "name": "The One-Column Phone Rule",
+    "body": "Every grid declares an explicit one-column track on phones (`minmax(0,1fr)`), so a wide child can never widen the page.",
+    "section": "layout"
+   },
+   {
+    "name": "The Flat Board Rule",
+    "body": "A board is enamel, not a device. No bevels, no split-flap faking, no inner glow beyond the single 1px top highlight.",
+    "section": "elevation"
+   }
+  ],
+  "dos": [
+   "Do show \"Counting…\" until the engine has answered; never render a fake 0 or a dash pretending to be a value.",
+   "Do put the Exact or ≈ Estimate stamp next to every token count.",
+   "Do draw every cost ramp on the same fixed log scale ($0.003 to $100 per 1M).",
+   "Do keep prices in amber mono with tabular numerals, using amber ink on paper.",
+   "Do collapse long lists behind \"Show all\" and keep phone pages free of horizontal scroll."
+  ],
+  "donts": [
+   "Don't use amber for anything that is not money or a live rate.",
+   "Don't build grids of equal stat tiles; give one figure display size and set the rest as a quiet row.",
+   "Don't add kickers or eyebrow labels above headings, gradient text, glass, or glow.",
+   "Don't fake the board as a physical split-flap or bevelled device.",
+   "Don't claim savings in characters; the minifier reports tokens counted with the same encoding."
+  ]
+ }
+}

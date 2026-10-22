@@ -19,7 +19,8 @@ export function MobileTally() {
 
   useEffect(() => {
     const editor = document.getElementById("prompt-pane");
-    const answer = document.getElementById("answer-panel");
+    // The count itself, not the card edge: the card can peek in while the figure is still off-screen
+    const answer = document.getElementById("answer-count");
     if (!editor || !answer) return;
     const seen = new Map<Element, boolean>();
     const io = new IntersectionObserver((entries) => {

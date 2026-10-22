@@ -175,7 +175,7 @@
 .tk-3 { text-decoration-color: rgb(var(--tk-3)); }
 .tk-at {
   background: rgb(var(--gold) / 0.28);
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 /* Token chips (stream view) */

@@ -123,14 +123,14 @@ function UserMenu({
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500">
               Signed in as
             </span>
             <span className="truncate font-mono text-xs text-zinc-200">
               {email || "User"}
             </span>
             {providerLabel && (
-              <span className="mt-1 inline-flex w-fit items-center rounded-full border border-rule bg-panel px-2 py-0.5 font-mono text-[10px] text-ink-2">
+              <span className="mt-1 inline-flex w-fit items-center rounded-full border border-rule bg-panel px-2 py-0.5 font-mono text-[11px] text-ink-2">
                 {providerLabel}
               </span>
             )}

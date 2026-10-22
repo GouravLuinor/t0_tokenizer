@@ -20,7 +20,8 @@ export function Wordmark({ className = "" }: { className?: string }) {
   );
 }
 
-export function TopBar({ home = "/tools/tokencraft" }: { home?: string }) {
+/** `linkBase` prefixes the section anchors when the bar sits on another page. */
+export function TopBar({ home = "/tools/tokencraft", linkBase = "" }: { home?: string; linkBase?: string }) {
   return (
     <header className="sticky top-0 z-50 bg-board text-board-ink">
       <div className="mx-auto flex h-14 w-full max-w-[1440px] items-center gap-6 px-4 md:px-8 lg:px-10">
@@ -37,7 +38,7 @@ export function TopBar({ home = "/tools/tokencraft" }: { home?: string }) {
             {NAV.map((item) => (
               <li key={item.href}>
                 <a
-                  href={item.href}
+                  href={`${linkBase}${item.href}`}
                   className="rounded-md px-2.5 py-1.5 text-[13px] text-board-ink-2 transition-colors hover:bg-board-2 hover:text-board-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                 >
                   {item.label}

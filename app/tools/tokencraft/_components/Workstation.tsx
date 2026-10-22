@@ -23,7 +23,12 @@ export function Workstation() {
   useEffect(() => {
     // Restore the saved workspace after mount; the tokenizer then re-derives
     // token data from the restored text
-    void useTokenCraftStore.persist.rehydrate();
+    void Promise.resolve(useTokenCraftStore.persist.rehydrate()).then(() => {
+      // Model pages link here with ?model=<key>; it wins over the saved pick
+      const wanted = new URLSearchParams(window.location.search).get("model");
+      const state = useTokenCraftStore.getState();
+      if (wanted && state.modelsRegistry[wanted]) state.setSelectedModel(wanted);
+    });
     void syncLivePrices();
   }, [syncLivePrices]);
 

@@ -110,3 +110,13 @@ describe("formatting", () => {
     expect(formatCompact(10_000)).toBe("10k");
   });
 });
+
+describe("model page slugs", () => {
+  it("turns dots into hyphens and suffixes collisions", async () => {
+    const { buildSlugMap } = await import("../modelPages");
+    const map = buildSlugMap({ "gpt-5.6": base, "gpt-5-6": base, "Claude Opus": base });
+    expect(map.get("gpt-5-6")).toBe("gpt-5.6");
+    expect(map.get("gpt-5-6-2")).toBe("gpt-5-6");
+    expect(map.get("claude-opus")).toBe("Claude Opus");
+  });
+});

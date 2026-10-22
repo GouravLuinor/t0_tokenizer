@@ -114,6 +114,7 @@ export function AnswerPanel() {
             </span>
           </div>
           <p
+            id="answer-count"
             className={`mt-1 font-display text-[64px] font-semibold leading-[0.95] text-ink sm:text-[88px] ${stale ? "opacity-70" : ""}`}
             aria-live="polite"
             aria-busy={counting || stale}
@@ -138,7 +139,7 @@ export function AnswerPanel() {
             ].map(([label, value, note]) => (
               <div key={label as string} className="min-w-0">
                 <dt className="truncate text-[12px] text-ink-2">{label}</dt>
-                <dd className="mt-0.5 truncate font-mono text-[17px] font-medium text-gold-ink sm:text-[19px]">
+                <dd className="mt-0.5 truncate font-mono text-[17px] font-medium text-gold-ink sm:text-[18px]">
                   {counting ? dash : <RollingFigure value={formatMoney(value as number)} />}
                 </dd>
                 <dd className="truncate text-[11px] text-ink-3">{note}</dd>
@@ -214,7 +215,7 @@ export function AnswerPanel() {
                     />
                   </span>
                   <span className="text-right font-mono text-[13px] text-gold tnum">
-                    {counting ? dash : formatMoney(c.total)}
+                    <RollingFigure value={formatMoney(c.total)} />
                   </span>
                 </button>
               </li>

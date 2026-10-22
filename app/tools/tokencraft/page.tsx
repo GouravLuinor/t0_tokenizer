@@ -42,7 +42,7 @@ export default function TokenCraftPage() {
       <main id="main">
         <section aria-labelledby="page-title" className="mx-auto w-full max-w-[1440px] px-4 pb-14 pt-6 md:px-8 md:pt-8 lg:px-10">
           <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-            <h1 id="page-title" className="font-display text-[30px] font-bold uppercase leading-none tracking-[0.02em] text-ink sm:text-[36px]">
+            <h1 id="page-title" className="font-display text-[32px] font-bold uppercase leading-none tracking-[0.02em] text-ink sm:text-[36px]">
               Token counter &amp; LLM cost calculator
             </h1>
             <p className="max-w-2xl text-[14px] leading-snug text-ink-2">

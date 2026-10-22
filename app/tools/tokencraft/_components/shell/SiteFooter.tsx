@@ -17,7 +17,7 @@ const HERE = [
   ["#faq", "FAQ"],
 ];
 
-export function SiteFooter() {
+export function SiteFooter({ linkBase = "" }: { linkBase?: string }) {
   return (
     <footer className="bg-board text-board-ink">
       <div className="mx-auto w-full max-w-[1440px] px-4 py-12 md:px-8 lg:px-10">
@@ -40,12 +40,12 @@ export function SiteFooter() {
 
           <nav aria-labelledby="footer-here">
             <h2 id="footer-here" className="text-[13px] font-medium text-board-ink">
-              On this page
+              TokenCraft
             </h2>
             <ul className="mt-3 space-y-2">
               {HERE.map(([href, label]) => (
                 <li key={href}>
-                  <a href={href} className="text-[14px] text-board-ink-2 hover:text-board-ink">
+                  <a href={`${linkBase}${href}`} className="text-[14px] text-board-ink-2 hover:text-board-ink">
                     {label}
                   </a>
                 </li>

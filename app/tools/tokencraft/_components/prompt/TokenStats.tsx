@@ -46,7 +46,7 @@ export function TokenStats({
         {figures.map(([label, value, note]) => (
           <div key={label}>
             <dt className="text-[13px] text-ink-2">{label}</dt>
-            <dd className="mt-1 font-display text-[34px] font-semibold leading-none text-ink tnum">{value}</dd>
+            <dd className="mt-1 font-display text-[36px] font-semibold leading-none text-ink tnum">{value}</dd>
             <dd className="mt-1.5 text-xs leading-snug text-ink-3">{note}</dd>
           </div>
         ))}

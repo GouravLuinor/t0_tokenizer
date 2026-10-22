@@ -20,6 +20,7 @@ export function MinifierSection() {
   const registry = useTokenCraftStore((s) => s.modelsRegistry);
   const selected = useTokenCraftStore((s) => s.selectedModel);
   const preview = useTokenCraftStore((s) => s.generateMinifyPreview);
+  const loadPreset = useTokenCraftStore((s) => s.loadPreset);
   const model = getCurrentModel(registry, selected);
 
   const counted = savings && savings.forText === rawText ? savings : null;
@@ -72,7 +73,20 @@ export function MinifierSection() {
                     for.
                   </>
                 ) : (
-                  "This prompt is already tight. There is no formatting to remove."
+                  <>
+                    This prompt is already tight; there is no formatting to remove.{" "}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        loadPreset("json-payload");
+                        document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="font-medium text-ink underline decoration-rule-2 underline-offset-4 hover:decoration-ink"
+                    >
+                      Load an indented JSON payload
+                    </button>{" "}
+                    to see it work.
+                  </>
                 )}
               </p>
             </>

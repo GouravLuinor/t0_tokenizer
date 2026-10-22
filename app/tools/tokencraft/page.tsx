@@ -1,99 +1,66 @@
-import { Cpu, ShieldCheck, Lock } from "lucide-react";
-import { SiteHeader } from "./_components/SiteHeader";
+import { TopBar } from "./_components/shell/TopBar";
+import { SiteFooter } from "./_components/shell/SiteFooter";
 import { Workstation } from "./_components/Workstation";
-import { WorkloadSection } from "./_components/WorkloadSection";
-import { KnowledgeHub } from "./_components/KnowledgeHub";
+import { RateBoard } from "./_components/board/RateBoard";
+import { MinifierSection } from "./_components/sections/MinifierSection";
+import { CompareSection } from "./_components/sections/CompareSection";
+import { GuideSection } from "./_components/sections/GuideSection";
 import { FaqSection } from "./_components/FaqSection";
-import { StudioFooter } from "./_components/StudioFooter";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { MODEL_REGISTRY } from "./_store/useTokenCraftStore";
+import { siteUrl } from "@/lib/site";
+import { isExactCount } from "./_lib/costs";
 
-const TRUST_BADGES = [
-  {
-    icon: ShieldCheck,
-    label: "No cloud storage",
-    detail: "Your prompts never leave the browser",
-    className: "border-emerald-500/20 text-emerald-300/90",
-  },
-  {
-    icon: Cpu,
-    label: "Client-side BPE",
-    detail: "Exact o200k & cl100k token boundaries",
-    className: "border-sky-500/20 text-sky-300/90",
-  },
-  {
-    icon: Lock,
-    label: "No account required",
-    detail: "Free forever, no paywall, no ads",
-    className: "border-white/10 text-zinc-300/90",
-  },
-] as const;
+const MODEL_COUNT = Object.keys(MODEL_REGISTRY).length;
+const ESTIMATED_COUNT = Object.values(MODEL_REGISTRY).filter((m) => !isExactCount(m)).length;
+
+const APP_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "TokenCraft",
+  url: `${siteUrl()}/tools/tokencraft`,
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "Any (runs in the browser)",
+  description: `Token counter and LLM cost calculator. Exact counts for OpenAI encodings, estimates for ${MODEL_COUNT}+ other models, live OpenRouter prices, all computed in your browser.`,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  publisher: { "@type": "Organization", name: "Nor AI", url: "https://norai.tech" },
+};
 
 export default function TokenCraftPage() {
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="min-h-dvh bg-background text-zinc-100 selection:bg-sky-500/20">
       <a
         href="#workspace"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[80] focus:px-3 focus:py-1.5 focus:rounded-lg focus:bg-zinc-100 focus:text-zinc-950 focus:text-xs focus:font-mono focus:shadow-elevated"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[80] focus:rounded-md focus:bg-gold focus:px-3 focus:py-1.5 focus:text-[13px] focus:text-[#1d1400]"
       >
-        Skip to workspace
+        Skip to the counter
       </a>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(APP_JSON_LD) }} />
 
-      <SiteHeader />
+      <TopBar />
 
-      <main id="main" className="relative w-full">
-        {/* Section 1 — Hero Workstation */}
-        <section
-          aria-label="Token Crafting Workstation"
-          className="mx-auto w-full max-w-7xl px-4 pt-12 pb-16 md:px-6 md:pt-16 lg:px-8"
-        >
-          <header className="mb-10 md:mb-12 max-w-3xl">
-            <h1 className="text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl">
-              AI Tokenizer &amp; Token Cost Calculator
+      <main id="main">
+        <section aria-labelledby="page-title" className="mx-auto w-full max-w-[1440px] px-4 pb-14 pt-6 md:px-8 md:pt-8 lg:px-10">
+          <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
+            <h1 id="page-title" className="font-display text-[30px] font-bold uppercase leading-none tracking-[0.02em] text-ink sm:text-[36px]">
+              Token counter &amp; LLM cost calculator
             </h1>
-            <p className="mt-4 text-base leading-relaxed text-zinc-400 sm:text-lg">
-              Count tokens with the exact OpenAI BPE encodings, see where every
-              token boundary falls, and price your prompt across{" "}
-              <span className="text-zinc-200">95 live models</span> — all
-              computed in your browser.
+            <p className="max-w-2xl text-[14px] leading-snug text-ink-2">
+              Exact counts for GPT models, clearly marked estimates for {ESTIMATED_COUNT} others, and what the call costs
+              at today&apos;s rates. Counted in your browser; your text is never uploaded.
             </p>
-
-            <ul className="mt-7 flex flex-wrap gap-3">
-              {TRUST_BADGES.map(({ icon: Icon, label, detail, className }) => (
-                <li
-                  key={label}
-                  className={`flex items-center gap-2.5 rounded-xl border bg-surface-subtle/40 px-3.5 py-2.5 ${className}`}
-                >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="flex flex-col">
-                    <span className="text-sm font-medium leading-tight">
-                      {label}
-                    </span>
-                    <span className="text-xs font-normal leading-tight text-zinc-400">
-                      {detail}
-                    </span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </header>
-
+          </div>
           <Workstation />
         </section>
 
-        {/* Section 2 — Workload Budget Calculator */}
-        <WorkloadSection />
-
-        {/* Section 3 — Knowledge Hub */}
-        <KnowledgeHub />
-
-        {/* Section 4 — FAQ */}
+        <RateBoard />
+        <MinifierSection />
+        <CompareSection />
+        <GuideSection />
         <FaqSection />
       </main>
 
-      {/* Section 5 — Studio Footer */}
-      <StudioFooter />
-      </div>
+      <SiteFooter />
     </TooltipProvider>
   );
 }

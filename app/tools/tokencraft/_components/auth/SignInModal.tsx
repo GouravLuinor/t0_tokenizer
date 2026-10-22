@@ -21,12 +21,12 @@ const PROVIDERS: Array<{
   {
     id: "google",
     label: "Continue with Google",
-    className: "border-white/15 bg-surface-elevated text-zinc-100 hover:bg-white/10",
+    className: "border-rule bg-sheet text-ink hover:bg-panel",
   },
   {
     id: "github",
     label: "Continue with GitHub",
-    className: "border-surface-border bg-surface-default text-zinc-200 hover:bg-surface-elevated",
+    className: "border-transparent bg-board text-board-ink hover:bg-board-2",
   },
 ];
 
@@ -48,22 +48,15 @@ export function SignInModal() {
     }
     if (trigger === "export") {
       return {
-        title: "Sign in to Export Reports",
+        title: "Sign in to export this report",
         description:
-          "Exporting CSV, JSON, and Markdown cost reports requires a free Nor AI account. Token counting and analysis stay free forever.",
-      };
-    }
-    if (trigger === "return-visit") {
-      return {
-        title: "Welcome back to TokenCraft",
-        description:
-          "Sign in to unlock report exports, sync custom presets, and keep your model pricing history.",
+          "CSV, JSON and Markdown exports need a free Nor AI account. Counting, pricing and the minifier stay free with no account.",
       };
     }
     return {
       title: "Sign in to TokenCraft",
       description:
-        "Connect with Google or GitHub to save custom presets, export reports, and access account preferences.",
+        "Use Google or GitHub. An account is only needed for exports; everything else works without one.",
     };
   }, [isAuthenticated, session?.user?.email, trigger]);
 
@@ -94,20 +87,20 @@ export function SignInModal() {
             <DialogTitle className="text-lg">
               {title}
             </DialogTitle>
-            <DialogDescription className="mt-2 font-sans normal-case leading-relaxed text-zinc-400">
+            <DialogDescription className="mt-2 leading-relaxed text-ink-2">
               {description}
             </DialogDescription>
           </DialogHeader>
 
           {!isConfigured && (
-            <p className="mt-5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3.5 py-3 text-xs leading-relaxed text-amber-300/90">
+            <p className="mt-5 rounded-md border border-gold/40 bg-gold-wash px-3.5 py-3 text-xs leading-relaxed text-gold-ink">
               Sign-in is not enabled on this deployment. Everything in
               TokenCraft works without it.
             </p>
           )}
 
           {error && (
-            <p role="alert" className="mt-4 text-xs text-rose-300">
+            <p role="alert" className="mt-4 text-xs text-danger">
               {error}
             </p>
           )}
@@ -140,7 +133,7 @@ export function SignInModal() {
           <button
             type="button"
             onClick={close}
-            className="mt-4 w-full rounded-lg py-2 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
+            className="mt-4 w-full rounded-md py-2 text-sm text-ink-3 transition-colors hover:text-ink"
           >
             Not now
           </button>

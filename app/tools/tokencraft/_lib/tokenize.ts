@@ -48,9 +48,13 @@ export function tokenizeText(
       id,
       text: rawChunk,
       byteLength,
+      start: 0,
+      end: 0,
       search: `${rawChunk} #${id}`.toLowerCase(),
     };
   });
+
+  assignOffsets(text, tokens);
 
   return {
     tokens,
@@ -60,6 +64,48 @@ export function tokenizeText(
     byteCount: encoder.encode(text).length,
     executionTimeMs: Number((performance.now() - startTime).toFixed(2)),
   };
+}
+
+/**
+ * Walks the token list once, giving every token its UTF-16 span in `text`.
+ *
+ * gpt-tokenizer decodes statefully: a token holding only part of a
+ * multi-byte character decodes to "" and the token that completes it carries
+ * the whole character. Those leading partial tokens share the span of the
+ * character they help build, so the overlay can underline it as one unit.
+ */
+function assignOffsets(text: string, tokens: TokenChunk[]): void {
+  let pos = 0;
+  let pendingFrom = -1;
+  for (let i = 0; i < tokens.length; i++) {
+    const piece = tokens[i].text;
+    if (piece.length === 0) {
+      if (pendingFrom < 0) pendingFrom = i;
+      continue;
+    }
+
+    const at = text.startsWith(piece, pos) ? pos : text.indexOf(piece, pos);
+    const start = at < 0 ? pos : at;
+    const end = at < 0 ? pos : start + piece.length;
+
+    if (pendingFrom >= 0) {
+      const firstChar = String.fromCodePoint(piece.codePointAt(0) ?? 0);
+      for (let k = pendingFrom; k < i; k++) {
+        tokens[k].start = start;
+        tokens[k].end = start + firstChar.length;
+      }
+      pendingFrom = -1;
+    }
+
+    tokens[i].start = start;
+    tokens[i].end = end;
+    pos = end;
+  }
+
+  for (let k = Math.max(pendingFrom, 0); pendingFrom >= 0 && k < tokens.length; k++) {
+    tokens[k].start = pos;
+    tokens[k].end = pos;
+  }
 }
 
 /** Safe variant for the main-thread fallback: never throws. */

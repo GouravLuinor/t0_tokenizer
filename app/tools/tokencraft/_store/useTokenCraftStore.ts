@@ -15,8 +15,9 @@ import {
 } from "../_lib/priceService";
 
 export { type ModelPricing, INITIAL_MODEL_REGISTRY as MODEL_REGISTRY };
+const MODEL_REGISTRY_SNAPSHOT = INITIAL_MODEL_REGISTRY;
 
-export type VisualViewMode = "chips" | "ids" | "heatmap" | "analytics";
+export type VisualViewMode = "text" | "chips" | "ids" | "heatmap" | "analytics";
 
 interface TokenCraftState {
   rawText: string;
@@ -25,6 +26,13 @@ interface TokenCraftState {
   modelsRegistry: Record<string, ModelPricing>;
   isSyncingPrices: boolean;
   lastSyncedAt: string | null;
+  /** Where the current rates came from: build snapshot, live fetch, or a cached live fetch */
+  priceSource: "snapshot" | "live" | "cached";
+  /**
+   * The exact text the current token data describes. null until the engine
+   * has answered once, so the UI can show "counting" instead of a fake zero.
+   */
+  tokenizedText: string | null;
   tokenChunks: TokenChunk[];
   tokenCount: number;
   characterCount: number;
@@ -36,6 +44,8 @@ interface TokenCraftState {
   executionTimeMs: number;
   viewMode: VisualViewMode;
   isWorkerDegraded: boolean;
+  /** Tokens the minifier would save on the current text, once counted */
+  minifySavings: { forText: string; before: number; after: number } | null;
 
   // Modals & Options
   diffModalOpen: boolean;
@@ -50,6 +60,7 @@ interface TokenCraftState {
   setOutputMultiplier: (multiplier: number) => void;
   setViewMode: (mode: VisualViewMode) => void;
   setTokenData: (data: Partial<TokenCraftState>) => void;
+  setMinifySavings: (savings: TokenCraftState["minifySavings"]) => void;
   setWorkerDegraded: (degraded: boolean) => void;
   setDiffModalOpen: (open: boolean) => void;
   setCommandPaletteOpen: (open: boolean) => void;
@@ -71,6 +82,8 @@ export const useTokenCraftStore = create<TokenCraftState>()(
   modelsRegistry: INITIAL_MODEL_REGISTRY,
   isSyncingPrices: false,
   lastSyncedAt: null,
+  priceSource: "snapshot",
+  tokenizedText: null,
   tokenChunks: [],
   tokenCount: 0,
   characterCount: 0,
@@ -80,8 +93,9 @@ export const useTokenCraftStore = create<TokenCraftState>()(
   outputMultiplier: 0.5,
   isProcessing: false,
   executionTimeMs: 0,
-  viewMode: "chips",
+  viewMode: "text",
   isWorkerDegraded: false,
+  minifySavings: null,
 
   diffModalOpen: false,
   commandPaletteOpen: false,
@@ -94,6 +108,7 @@ export const useTokenCraftStore = create<TokenCraftState>()(
   setOutputMultiplier: (outputMultiplier) => set({ outputMultiplier }),
   setViewMode: (viewMode) => set({ viewMode }),
   setTokenData: (data) => set(data),
+  setMinifySavings: (minifySavings) => set({ minifySavings }),
   setWorkerDegraded: (isWorkerDegraded) => set({ isWorkerDegraded }),
   setDiffModalOpen: (diffModalOpen) => set({ diffModalOpen }),
   setCommandPaletteOpen: (commandPaletteOpen) => set({ commandPaletteOpen }),
@@ -145,6 +160,7 @@ export const useTokenCraftStore = create<TokenCraftState>()(
     set({
       rawText: "",
       previousText: null,
+      tokenizedText: "",
       tokenChunks: [],
       tokenCount: 0,
       characterCount: 0,
@@ -157,10 +173,12 @@ export const useTokenCraftStore = create<TokenCraftState>()(
   syncLivePrices: async () => {
     set({ isSyncingPrices: true });
     try {
-      const { registry, timestamp } = await fetchLiveModelPricing();
+      const { registry, timestamp, fromCache } = await fetchLiveModelPricing();
+      const isSnapshot = registry === MODEL_REGISTRY_SNAPSHOT;
       set({
         modelsRegistry: registry,
-        lastSyncedAt: timestamp,
+        lastSyncedAt: isSnapshot ? null : timestamp,
+        priceSource: isSnapshot ? "snapshot" : fromCache ? "cached" : "live",
         isSyncingPrices: false,
       });
     } catch {
@@ -170,13 +188,15 @@ export const useTokenCraftStore = create<TokenCraftState>()(
 }),
     {
       name: "tokencraft-workspace",
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => localStorage),
       // The model catalog is regenerated from OpenRouter (scripts/sync-models.mjs);
       // a persisted key may no longer exist after a catalog swap (e.g. the dead
       // qwen3.8-max id). Reset to the default instead of rendering a stale model.
-      migrate: (persistedState) => {
+      migrate: (persistedState, fromVersion) => {
         const state = (persistedState ?? {}) as Partial<PersistedWorkspace>;
+        // v3 made the in-place text view the default; older saves land there once
+        if (fromVersion < 3) state.viewMode = "text";
         const selectedModel =
           state.selectedModel && state.selectedModel in INITIAL_MODEL_REGISTRY
             ? state.selectedModel

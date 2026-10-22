@@ -1,367 +1,195 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import {
-  useTokenCraftStore,
-  type VisualViewMode,
-} from "../_store/useTokenCraftStore";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Search } from "lucide-react";
+import { useTokenCraftStore, type VisualViewMode } from "../_store/useTokenCraftStore";
 import { PROMPT_PRESETS } from "../_lib/presets";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { isExactCount } from "../_lib/costs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Keycap } from "@/components/ui/keycap";
-import { ShinyText } from "@/components/ui/shiny-text";
 import { copyText } from "@/lib/clipboard";
-import {
-  Cpu,
-  Bookmark,
-  Minimize2,
-  Copy,
-  Trash2,
-  Layers,
-  Undo2,
-  Command,
-} from "lucide-react";
 
 interface CommandItem {
   id: string;
-  category: "Models" | "Presets" | "Actions" | "View Modes";
+  group: "Actions" | "Show the prompt as" | "Samples" | "Models";
   title: string;
-  subtitle?: string;
-  icon: React.ElementType;
+  hint?: string;
   shortcut?: string[];
-  action: () => void;
+  run: () => void | Promise<void>;
 }
 
+const VIEWS: { mode: VisualViewMode; label: string; hint: string }[] = [
+  { mode: "text", label: "Text", hint: "Edit with token boundaries underlined" },
+  { mode: "chips", label: "Tokens", hint: "One chip per token" },
+  { mode: "ids", label: "IDs", hint: "The numbers the model sees" },
+  { mode: "heatmap", label: "Bytes", hint: "Tokens shaded by UTF-8 size" },
+  { mode: "analytics", label: "Stats", hint: "Compression and repeated tokens" },
+];
+
+/** ⌘K: every action, view, sample and model, searchable from the keyboard. */
 export function CommandPalette() {
-  const commandPaletteOpen = useTokenCraftStore(
-    (s) => s.commandPaletteOpen
-  );
-  const setCommandPaletteOpen = useTokenCraftStore(
-    (s) => s.setCommandPaletteOpen
-  );
-  const setSelectedModel = useTokenCraftStore((s) => s.setSelectedModel);
-  const modelsRegistry = useTokenCraftStore((s) => s.modelsRegistry);
+  const open = useTokenCraftStore((s) => s.commandPaletteOpen);
+  const setOpen = useTokenCraftStore((s) => s.setCommandPaletteOpen);
+  const registry = useTokenCraftStore((s) => s.modelsRegistry);
+  const selectModel = useTokenCraftStore((s) => s.setSelectedModel);
   const loadPreset = useTokenCraftStore((s) => s.loadPreset);
-  const generateMinifyPreview = useTokenCraftStore(
-    (s) => s.generateMinifyPreview
-  );
-  const revertMinification = useTokenCraftStore(
-    (s) => s.revertMinification
-  );
-  const hasPreviousText = useTokenCraftStore((s) => s.previousText !== null);
+  const minify = useTokenCraftStore((s) => s.generateMinifyPreview);
+  const revert = useTokenCraftStore((s) => s.revertMinification);
+  const canRevert = useTokenCraftStore((s) => s.previousText !== null);
   const clearText = useTokenCraftStore((s) => s.clearText);
   const setViewMode = useTokenCraftStore((s) => s.setViewMode);
-  const tokenCount = useTokenCraftStore((s) => s.tokenCount);
 
-  const [search, setSearch] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  // Fresh query surface on every open — a stale filter from the previous
-  // session made Enter silently no-op when relaunching the palette
+  // A fresh query on every open; a stale filter made Enter silently no-op
   useEffect(() => {
-    if (commandPaletteOpen) {
-      setSearch("");
-      setSelectedIndex(0);
+    if (open) {
+      setQuery("");
+      setActive(0);
     }
-  }, [commandPaletteOpen]);
+  }, [open]);
 
-  // NOTE: Global Cmd+K handling lives in useGlobalShortcuts (mounted once on the page).
-
-  const commands: CommandItem[] = useMemo(() => {
-    const list: CommandItem[] = [];
-
-    // Models
-    Object.entries(modelsRegistry).forEach(([key, model]) => {
-      list.push({
-        id: `model-${key}`,
-        category: "Models",
-        title: `Switch Model: ${model.name}`,
-        subtitle: `${model.provider} • ${model.family} • ${model.badgeText} context`,
-        icon: Cpu,
-        action: () => {
-          setSelectedModel(key);
-          setCommandPaletteOpen(false);
+  const commands = useMemo<CommandItem[]>(() => {
+    const close = () => setOpen(false);
+    const list: CommandItem[] = [
+      { id: "minify", group: "Actions", title: "Minify the prompt", hint: "Review the diff first", shortcut: ["⌘", "M"], run: () => (close(), minify()) },
+      ...(canRevert
+        ? [{ id: "revert", group: "Actions" as const, title: "Undo minify", shortcut: ["⌘", "Z"], run: () => (revert(), close()) }]
+        : []),
+      {
+        id: "copy-ids",
+        group: "Actions",
+        title: "Copy token IDs as JSON",
+        run: async () => {
+          await copyText(JSON.stringify(useTokenCraftStore.getState().tokenChunks.map((t) => t.id)));
+          close();
         },
-      });
-    });
-
-    // Presets
-    Object.entries(PROMPT_PRESETS).forEach(([key, preset]) => {
-      list.push({
+      },
+      { id: "rates", group: "Actions", title: "Go to the rate board", run: () => (close(), document.getElementById("rate-board")?.scrollIntoView()) },
+      { id: "clear", group: "Actions", title: "Clear the prompt", shortcut: ["⌘", "⌫"], run: () => (clearText(), close()) },
+      ...VIEWS.map((v) => ({
+        id: `view-${v.mode}`,
+        group: "Show the prompt as" as const,
+        title: v.label,
+        hint: v.hint,
+        run: () => (setViewMode(v.mode), close()),
+      })),
+      ...Object.entries(PROMPT_PRESETS).map(([key, p]) => ({
         id: `preset-${key}`,
-        category: "Presets",
-        title: `Load Preset: ${preset.label}`,
-        subtitle: preset.description,
-        icon: Bookmark,
-        action: () => {
-          loadPreset(key);
-          setCommandPaletteOpen(false);
-        },
-      });
-    });
-
-    // View Modes
-    const modes: { mode: VisualViewMode; label: string; sub: string }[] = [
-      {
-        mode: "chips",
-        label: "BPE Boundary Chips",
-        sub: "5-color cyclic token boundaries",
-      },
-      {
-        mode: "ids",
-        label: "Token ID Stream",
-        sub: "Sequential integer token indices",
-      },
-      {
-        mode: "heatmap",
-        label: "Byte Density Heatmap",
-        sub: "UTF-8 multi-byte weight visualization",
-      },
-      {
-        mode: "analytics",
-        label: "Vocabulary Analytics",
-        sub: "Token distribution and compression efficiency",
-      },
+        group: "Samples" as const,
+        title: p.label,
+        hint: p.description,
+        run: () => (loadPreset(key), close()),
+      })),
+      ...Object.entries(registry).map(([key, m]) => ({
+        id: `model-${key}`,
+        group: "Models" as const,
+        title: m.name,
+        hint: `${m.provider} · ${m.badgeText} context${isExactCount(m) ? "" : " · ≈ estimate"}`,
+        run: () => (selectModel(key), close()),
+      })),
     ];
-
-    modes.forEach((m) => {
-      list.push({
-        id: `mode-${m.mode}`,
-        category: "View Modes",
-        title: `View Mode: ${m.label}`,
-        subtitle: m.sub,
-        icon: Layers,
-        action: () => {
-          setViewMode(m.mode);
-          setCommandPaletteOpen(false);
-        },
-      });
-    });
-
-    // Actions
-    list.push({
-      id: "action-minify",
-      category: "Actions",
-      title: "Minify Prompt & Inspect Diff",
-      subtitle: "Execute AST cleanup, comment stripping & whitespace reduction",
-      icon: Minimize2,
-      shortcut: ["⌘", "M"],
-      action: () => {
-        setCommandPaletteOpen(false);
-        generateMinifyPreview();
-      },
-    });
-
-    if (hasPreviousText) {
-      list.push({
-        id: "action-revert",
-        category: "Actions",
-        title: "Revert Last Minification",
-        subtitle: "Undo changes and restore previous text",
-        icon: Undo2,
-        shortcut: ["⌘", "Z"],
-        action: () => {
-          revertMinification();
-          setCommandPaletteOpen(false);
-        },
-      });
-    }
-
-    list.push({
-      id: "action-copy-tokens",
-      category: "Actions",
-      title: "Copy Token IDs Array",
-      subtitle: `Export ${tokenCount} token IDs as JSON array`,
-      icon: Copy,
-      action: async () => {
-        const ids = useTokenCraftStore.getState().tokenChunks.map((t) => t.id);
-        await copyText(JSON.stringify(ids));
-        setCommandPaletteOpen(false);
-      },
-    });
-
-    list.push({
-      id: "action-clear",
-      category: "Actions",
-      title: "Clear Editor",
-      subtitle: "Erase raw text and reset token counters",
-      icon: Trash2,
-      shortcut: ["⌘", "⌫"],
-      action: () => {
-        clearText();
-        setCommandPaletteOpen(false);
-      },
-    });
-
     return list;
-  }, [
-    modelsRegistry,
-    setSelectedModel,
-    loadPreset,
-    setViewMode,
-    generateMinifyPreview,
-    revertMinification,
-    hasPreviousText,
-    clearText,
-    tokenCount,
-    setCommandPaletteOpen,
-  ]);
+  }, [registry, canRevert, setOpen, minify, revert, clearText, setViewMode, loadPreset, selectModel]);
 
-  const filteredCommands = useMemo(() => {
-    if (!search.trim()) return commands;
-    const q = search.toLowerCase();
-    return commands.filter(
-      (c) =>
-        c.title.toLowerCase().includes(q) ||
-        (c.subtitle && c.subtitle.toLowerCase().includes(q)) ||
-        c.category.toLowerCase().includes(q)
-    );
-  }, [commands, search]);
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return commands;
+    return commands.filter((c) => `${c.title} ${c.hint ?? ""} ${c.group}`.toLowerCase().includes(q));
+  }, [commands, query]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const move = (delta: number) => {
+    if (!matches.length) return;
+    const next = (active + delta + matches.length) % matches.length;
+    setActive(next);
+    listRef.current?.querySelector(`[data-i="${next}"]`)?.scrollIntoView({ block: "nearest" });
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((prev) =>
-        prev < filteredCommands.length - 1 ? prev + 1 : 0
-      );
+      move(1);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredCommands.length - 1
-      );
+      move(-1);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const selected = filteredCommands[selectedIndex];
-      if (selected) {
-        selected.action();
-      }
+      void matches[active]?.run();
     }
   };
 
+  let lastGroup = "";
+
   return (
-    <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         exitAnimation={false}
-        className="max-w-2xl p-0 overflow-hidden border-surface-border bg-surface-default shadow-elevated rounded-2xl glass-edge"
+        className="max-w-xl gap-0 overflow-hidden rounded-xl border border-rule bg-sheet p-0 shadow-elevated"
       >
         <DialogHeader className="sr-only">
-          <DialogTitle>Command Palette</DialogTitle>
+          <DialogTitle>Commands</DialogTitle>
         </DialogHeader>
-
-        {/* Search Input Bar */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-surface-border bg-surface-subtle/80">
-          <Command className="w-4 h-4 text-sky-400" aria-hidden="true" />
+        <div className="flex items-center gap-3 border-b border-rule px-4 py-3">
+          <Search className="h-4 w-4 text-ink-3" aria-hidden="true" />
           <input
             type="text"
-            placeholder="Type a command or search actions…"
-            value={search}
+            value={query}
             onChange={(e) => {
-              setSearch(e.target.value);
-              setSelectedIndex(0);
+              setQuery(e.target.value);
+              setActive(0);
             }}
-            onKeyDown={handleKeyDown}
+            onKeyDown={onKeyDown}
             autoFocus
-            aria-label="Command palette search"
-            className="flex-1 bg-transparent text-sm font-mono text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
-            style={{ caretColor: "#38BDF8" }}
+            placeholder="Search actions, views, samples and models"
+            aria-label="Search commands"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="command-list"
+            aria-activedescendant={matches[active] ? `cmd-${matches[active].id}` : undefined}
+            className="flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3"
           />
-          <Keycap size="xs">ESC</Keycap>
+          <Keycap size="xs">Esc</Keycap>
         </div>
 
-        {/* Commands List (Raycast 6px rows, border-brighten) */}
-        <div className="max-h-80 overflow-y-auto p-2 space-y-1" role="listbox">
-          {filteredCommands.length === 0 ? (
-            <div className="p-6 text-center text-xs font-mono text-zinc-400">
-              No matching commands found.
-            </div>
-          ) : (
-            filteredCommands.map((cmd, idx) => {
-              const Icon = cmd.icon;
-              const isSelected = idx === selectedIndex;
-
-              return (
+        <div ref={listRef} id="command-list" role="listbox" aria-label="Commands" className="max-h-[360px] overflow-y-auto py-1.5">
+          {matches.length === 0 && <p className="px-4 py-8 text-center text-[13px] text-ink-3">Nothing matches “{query}”.</p>}
+          {matches.map((c, i) => {
+            const heading = c.group !== lastGroup ? c.group : null;
+            lastGroup = c.group;
+            const on = i === active;
+            return (
+              <React.Fragment key={c.id}>
+                {heading && <p className="px-4 pb-1 pt-3 text-[12px] font-medium text-ink-3" role="presentation">{heading}</p>}
                 <div
-                  key={cmd.id}
+                  id={`cmd-${c.id}`}
+                  data-i={i}
                   role="option"
-                  aria-selected={isSelected}
-                  onClick={cmd.action}
-                  onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between px-3 py-2 rounded-[6px] cursor-pointer transition-all duration-100 ${
-                    isSelected
-                      ? "bg-surface-elevated text-zinc-100 border border-surface-borderHover shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
-                      : "text-zinc-400 hover:text-zinc-200 border border-transparent"
-                  }`}
+                  aria-selected={on}
+                  onClick={() => void c.run()}
+                  onMouseMove={() => !on && setActive(i)}
+                  className={`mx-1.5 flex cursor-pointer items-center justify-between gap-3 rounded-md px-2.5 py-2 ${on ? "bg-panel" : ""}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`p-1.5 rounded-md border transition-colors ${
-                        isSelected
-                          ? "bg-surface-default border-sky-500/30 text-sky-400"
-                          : "bg-surface-subtle border-surface-border text-zinc-400"
-                      }`}
-                    >
-                      <Icon className="w-3.5 h-3.5" aria-hidden="true" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span
-                        className={`text-xs font-medium ${
-                          isSelected ? "text-zinc-100 font-semibold" : "text-zinc-300"
-                        }`}
-                      >
-                        {cmd.title}
-                      </span>
-                      {cmd.subtitle && (
-                        <span className="text-[10px] font-mono text-zinc-400">
-                          {cmd.subtitle}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {cmd.shortcut ? (
-                      <div className="flex items-center gap-1">
-                        {cmd.shortcut.map((key, i) => (
-                          <Keycap key={i} size="xs">
-                            {key}
-                          </Keycap>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-wider bg-surface-subtle px-1.5 py-0.5 rounded border border-surface-border">
-                        {cmd.category}
-                      </span>
-                    )}
-                  </div>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[14px] text-ink">{c.title}</span>
+                    {c.hint && <span className="block truncate text-[12px] text-ink-3">{c.hint}</span>}
+                  </span>
+                  {c.shortcut && (
+                    <span className="flex shrink-0 gap-1">
+                      {c.shortcut.map((k) => (
+                        <Keycap key={k} size="xs">
+                          {k}
+                        </Keycap>
+                      ))}
+                    </span>
+                  )}
                 </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Footer Navigation Hints */}
-        <div className="flex items-center justify-between px-4 py-2.5 bg-surface-subtle/80 border-t border-surface-border text-[10px] font-mono text-zinc-400">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              <Keycap size="xs">↑</Keycap>
-              <Keycap size="xs">↓</Keycap>
-              <span className="ml-1 text-zinc-400">Navigate</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <Keycap size="xs">↵</Keycap>
-              <span className="ml-1 text-zinc-400">Select</span>
-            </span>
-          </div>
-          <ShinyText shineColor="cyan" className="text-[10px]">
-            TokenCraft Studio
-          </ShinyText>
+              </React.Fragment>
+            );
+          })}
         </div>
       </DialogContent>
     </Dialog>
   );
 }
-

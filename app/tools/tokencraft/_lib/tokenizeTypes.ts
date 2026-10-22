@@ -14,6 +14,12 @@ export interface TokenChunk {
   id: number;
   text: string;
   byteLength: number;
+  /**
+   * UTF-16 offsets of this token in the source text. Tokens that each hold
+   * part of one multi-byte character share the span of that whole character.
+   */
+  start: number;
+  end: number;
   /** Precomputed lowercase haystack for client-side filtering */
   search: string;
 }

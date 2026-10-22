@@ -85,7 +85,7 @@ describe("countWords", () => {
 describe("mapStatsToStorePatch", () => {
   const sample = {
     tokens: [
-      { index: 0, id: 1, text: "a", byteLength: 1, search: "a #1" },
+      { index: 0, id: 1, text: "a", byteLength: 1, search: "a #1", start: 0, end: 1 },
     ],
     count: 1,
     characterCount: 3,
@@ -138,5 +138,55 @@ describe("format helpers", () => {
     expect(formatBytes(0)).toBe("0 B");
     expect(formatBytes(1024)).toBe("1 KB");
     expect(formatBytes(1536)).toBe("1.5 KB");
+  });
+});
+
+describe("character offsets", () => {
+  const cases = [
+    "The quick brown fox jumps over the lazy dog.",
+    "héllo 世界 🚀🎉 नमस्ते दुनिया",
+    "👨‍👩‍👧‍👦 family\n\tindent  double  space",
+    "literal � replacement char",
+    "",
+  ];
+
+  it.each(cases)("tiles the source text exactly: %s", (text) => {
+    for (const enc of ["o200k_base", "cl100k_base"] as const) {
+      const stats = tokenizeTextSafe(text, enc)!;
+      let cursor = 0;
+      for (const t of stats.tokens) {
+        // Tokens never move backwards and stay within the text
+        expect(t.start).toBeGreaterThanOrEqual(0);
+        expect(t.end).toBeLessThanOrEqual(text.length);
+        expect(t.start).toBeLessThanOrEqual(t.end);
+        if (t.start > cursor) throw new Error(`gap at ${cursor}`);
+        cursor = Math.max(cursor, t.end);
+      }
+      expect(cursor).toBe(text.length);
+    }
+  });
+
+  it("maps clean tokens to their own text", () => {
+    const text = "Hello world";
+    const stats = tokenizeTextSafe(text, "o200k_base")!;
+    for (const t of stats.tokens) {
+      expect(text.slice(t.start, t.end)).toBe(t.text);
+    }
+    const emoji = tokenizeTextSafe("ok 🦜 ok", "cl100k_base")!;
+    for (const t of emoji.tokens) {
+      if (t.text) expect("ok 🦜 ok".slice(t.start, t.end)).toBe(t.text);
+    }
+  });
+
+  it("groups tokens that split one multi-byte character", () => {
+    const text = "🦜";
+    const stats = tokenizeTextSafe(text, "cl100k_base")!;
+    expect(stats.tokens.length).toBeGreaterThan(1);
+    for (const t of stats.tokens) {
+      expect(t.start).toBe(0);
+      expect(t.end).toBe(text.length);
+    }
+    // The completing token carries the character; the others are partial
+    expect(stats.tokens.at(-1)!.text).toBe(text);
   });
 });

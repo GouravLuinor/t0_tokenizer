@@ -19,28 +19,25 @@ function buildFaqJsonLd() {
 
 export function FaqSection() {
   return (
-    <section
-      aria-labelledby="faq-heading"
-      className="mx-auto w-full max-w-5xl px-4 py-12 md:px-6 md:py-16 lg:px-8"
-    >
+    <section id="faq" aria-labelledby="faq-heading" className="scroll-mt-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqJsonLd()) }}
       />
-
-      <header className="mb-8 max-w-3xl md:mb-10">
-        <h2
-          id="faq-heading"
-          className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl"
-        >
-          Frequently Asked Questions
-        </h2>
-        <p className="mt-3 text-base leading-relaxed text-zinc-400">
-          How TokenCraft handles your text, your data, and your money.
-        </p>
-      </header>
-
-      <FaqAccordion items={FAQS} />
+      <div className="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-8 px-4 py-14 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16 lg:px-10 lg:py-20">
+        <div>
+          <h2
+            id="faq-heading"
+            className="font-display text-[36px] font-bold uppercase leading-[0.95] tracking-[0.02em] text-ink sm:text-[48px]"
+          >
+            Questions people ask
+          </h2>
+          <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-ink-2">
+            About accuracy, prices and what happens to your text.
+          </p>
+        </div>
+        <FaqAccordion items={FAQS} />
+      </div>
     </section>
   );
 }

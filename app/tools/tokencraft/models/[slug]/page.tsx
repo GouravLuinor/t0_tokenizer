@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TopBar } from "../../_components/shell/TopBar";
+import { MadeBySection } from "../../_components/sections/MadeBySection";
 import { SiteFooter } from "../../_components/shell/SiteFooter";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { INITIAL_MODEL_REGISTRY, MODEL_CATALOG_GENERATED_AT } from "../../_lib/priceService";
@@ -14,7 +15,7 @@ import {
   rankByCost,
 } from "../../_lib/costs";
 import { MODEL_SLUGS, SLUG_BY_KEY, WORKLOADS, modelForSlug } from "../../_lib/modelPages";
-import { siteUrl } from "@/lib/site";
+import { ORG_REF, siteUrl } from "@/lib/site";
 import { formatNumber } from "@/lib/utils";
 
 const HOME = "/tools/tokencraft";
@@ -24,6 +25,13 @@ const SNAPSHOT = new Date(MODEL_CATALOG_GENERATED_AT).toLocaleDateString("en-GB"
   year: "numeric",
   timeZone: "UTC",
 });
+
+const OG_IMAGE = {
+  url: `${HOME}/opengraph-image`,
+  width: 1200,
+  height: 630,
+  alt: "TokenCraft by Nor AI: token counter and LLM cost calculator",
+};
 
 export const dynamicParams = false;
 
@@ -36,15 +44,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!found) return {};
   const { model } = found;
   const exact = isExactCount(model);
-  const title = `${model.name} token counter & price calculator`;
+  const fullTitle = `${model.name} token counter & price · TokenCraft by Nor AI`;
   const description = `${exact ? "Exact" : "Estimated"} ${model.name} token counts and costs: $${formatRate(model.inputCostPer1M)} per 1M input tokens, $${formatRate(model.outputCostPer1M)} per 1M output, ${formatCompact(model.contextWindow)} context. Paste a prompt to price it in your browser.`;
   const url = `${HOME}/models/${(await params).slug}`;
   return {
-    title,
+    title: { absolute: fullTitle },
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: "website", siteName: "TokenCraft" },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: { title: fullTitle, description, url, type: "website", siteName: "TokenCraft by Nor AI", images: [OG_IMAGE] },
+    twitter: { card: "summary_large_image", title: fullTitle, description, images: [OG_IMAGE.url] },
   };
 }
 
@@ -69,7 +77,8 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
     "@type": "WebPage",
     name: `${model.name} token counter & price calculator`,
     url: `${siteUrl()}${HOME}/models/${SLUG_BY_KEY.get(key)}`,
-    isPartOf: { "@type": "WebApplication", name: "TokenCraft", url: `${siteUrl()}${HOME}` },
+    isPartOf: { "@type": "WebApplication", name: "TokenCraft", url: `${siteUrl()}${HOME}`, publisher: ORG_REF },
+    publisher: ORG_REF,
     breadcrumb: {
       "@type": "BreadcrumbList",
       itemListElement: [
@@ -239,6 +248,7 @@ export default async function ModelPage({ params }: { params: Promise<{ slug: st
             )}
           </div>
         </section>
+      <MadeBySection />
       </main>
 
       <SiteFooter linkBase={HOME} />

@@ -1,13 +1,6 @@
+import { COMPANY, FAMILY_TOOLS, TOOL } from "@/lib/site";
+import { NorAiMark } from "./NorAiMark";
 import { Wordmark } from "./TopBar";
-
-/** The Nor AI family: every tool links to the others, minus itself. */
-const FAMILY = [
-  ["SchemaCraft", "JSON to Zod, Pydantic and TypeScript types", "https://schema.norai.tech"],
-  ["RegexCraft", "Regex tester with plain-English explanations", "https://regex.norai.tech"],
-  ["Judgewright", "Calibrate your LLM judge against human labels", "https://judge.norai.tech"],
-  ["Anchorflow", "Pin and audit GitHub Actions workflows", "https://anchor.norai.tech"],
-  ["Smart Rozgar", "Sarkari job alerts in Hindi and English", "https://rozgar.norai.tech"],
-];
 
 const HERE = [
   ["#workspace", "Token counter"],
@@ -18,6 +11,7 @@ const HERE = [
 ];
 
 export function SiteFooter({ linkBase = "" }: { linkBase?: string }) {
+  const others = FAMILY_TOOLS.filter((t) => t.name !== TOOL.name);
   return (
     <footer className="bg-board text-board-ink">
       <div className="mx-auto w-full max-w-[1440px] px-4 py-12 md:px-8 lg:px-10">
@@ -27,15 +21,16 @@ export function SiteFooter({ linkBase = "" }: { linkBase?: string }) {
             <p className="mt-3 max-w-xs text-[14px] leading-relaxed text-board-ink-2">
               Free token counter and LLM cost calculator. Your text stays in your browser.
             </p>
-            <a
-              href="https://norai.tech"
-              className="mt-5 inline-flex items-center gap-2 text-[14px] text-board-ink hover:text-gold"
-            >
-              <span aria-hidden="true" className="grid h-6 w-6 place-items-center rounded-[4px] bg-board-ink font-display text-[13px] font-bold text-board">
-                N
-              </span>
-              Built by Nor AI
+            <a href={COMPANY.url} className="mt-5 inline-flex items-center gap-2 text-[14px] text-board-ink hover:text-gold">
+              <NorAiMark size={24} />
+              Built by {COMPANY.name}
             </a>
+            <p className="mt-2 max-w-xs text-[13px] leading-relaxed text-board-ink-2">{COMPANY.blurb}</p>
+            <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[14px]">
+              <a href={COMPANY.contactUrl} className="font-medium text-board-ink underline decoration-gold hover:text-gold">Contact</a>
+              <a href={COMPANY.aboutUrl} className="text-board-ink-2 hover:text-board-ink">Mission</a>
+              <a href={COMPANY.toolsUrl} className="text-board-ink-2 hover:text-board-ink">All tools</a>
+            </p>
           </div>
 
           <nav aria-labelledby="footer-here">
@@ -58,11 +53,11 @@ export function SiteFooter({ linkBase = "" }: { linkBase?: string }) {
               More free tools
             </h2>
             <ul className="mt-3 space-y-2">
-              {FAMILY.map(([name, what, href]) => (
+              {others.map(({ name, blurb, href }) => (
                 <li key={href}>
                   <a href={href} className="group text-[14px]">
                     <span className="text-board-ink group-hover:text-gold">{name}</span>
-                    <span className="text-board-ink-2"> · {what}</span>
+                    <span className="text-board-ink-2"> · {blurb}</span>
                   </a>
                 </li>
               ))}
@@ -71,7 +66,7 @@ export function SiteFooter({ linkBase = "" }: { linkBase?: string }) {
         </div>
 
         <div className="mt-12 flex flex-col gap-2 border-t border-board-rule pt-5 text-[12px] text-board-ink-2 sm:flex-row sm:justify-between">
-          <p>© {new Date().getFullYear()} Nor AI</p>
+          <p>© {new Date().getFullYear()} {COMPANY.name}</p>
           <p>
             Prices from{" "}
             <a href="https://openrouter.ai/models" className="underline hover:text-board-ink" rel="noopener noreferrer">

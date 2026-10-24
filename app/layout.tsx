@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Barlow_Condensed } from "next/font/google";
-import { siteUrl } from "@/lib/site";
+import { COMPANY, ORGANIZATION_JSONLD, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
@@ -23,18 +23,33 @@ export const viewport: Viewport = {
   ],
 };
 
+const OG_IMAGE = {
+  url: "/tools/tokencraft/opengraph-image",
+  width: 1200,
+  height: 630,
+  alt: "TokenCraft by Nor AI: token counter and LLM cost calculator",
+};
+const SEO_TITLE = "Token Counter & LLM Cost Calculator · TokenCraft by Nor AI";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "Token Counter & LLM Cost Calculator — TokenCraft",
-    template: "%s — TokenCraft",
+    default: SEO_TITLE,
+    template: "%s · TokenCraft by Nor AI",
   },
   description:
     "Count tokens for GPT, Claude, Gemini, Llama and 90+ models, see exactly where each token splits, and compare what your prompt costs at live OpenRouter rates. Free, private, runs in your browser.",
   applicationName: "TokenCraft",
-  authors: [{ name: "Nor AI", url: "https://norai.tech" }],
-  creator: "Nor AI",
-  publisher: "Nor AI",
+  authors: [{ name: COMPANY.name, url: COMPANY.url }],
+  creator: COMPANY.name,
+  publisher: COMPANY.name,
+  openGraph: {
+    type: "website",
+    siteName: "TokenCraft by Nor AI",
+    title: SEO_TITLE,
+    images: [OG_IMAGE],
+  },
+  twitter: { card: "summary_large_image", title: SEO_TITLE, images: [OG_IMAGE.url] },
 };
 
 /**
@@ -58,6 +73,10 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
       </head>
       <body className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", ...ORGANIZATION_JSONLD }) }}
+        />
         {children}
       </body>
     </html>

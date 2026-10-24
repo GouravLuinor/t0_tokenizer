@@ -8,7 +8,8 @@ import { GuideSection } from "./_components/sections/GuideSection";
 import { FaqSection } from "./_components/FaqSection";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { MODEL_REGISTRY } from "./_store/useTokenCraftStore";
-import { siteUrl } from "@/lib/site";
+import { MadeBySection } from "./_components/sections/MadeBySection";
+import { ORG_REF, siteUrl } from "@/lib/site";
 import { isExactCount } from "./_lib/costs";
 
 const MODEL_COUNT = Object.keys(MODEL_REGISTRY).length;
@@ -23,7 +24,8 @@ const APP_JSON_LD = {
   operatingSystem: "Any (runs in the browser)",
   description: `Token counter and LLM cost calculator. Exact counts for OpenAI encodings, estimates for ${MODEL_COUNT}+ other models, live OpenRouter prices, all computed in your browser.`,
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  publisher: { "@type": "Organization", name: "Nor AI", url: "https://norai.tech" },
+  creator: ORG_REF,
+  publisher: ORG_REF,
 };
 
 export default function TokenCraftPage() {
@@ -56,6 +58,7 @@ export default function TokenCraftPage() {
         <RateBoard />
         <MinifierSection />
         <CompareSection />
+        <MadeBySection />
         <GuideSection />
         <FaqSection />
       </main>

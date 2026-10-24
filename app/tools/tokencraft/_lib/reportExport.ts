@@ -1,4 +1,5 @@
 import type { ModelPricing } from "./modelTypes";
+import { COMPANY, TOOL } from "@/lib/site";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 
 export interface ReportParams {
@@ -56,6 +57,7 @@ export function buildMarkdownReport({
   models,
 }: ReportParams): string {
   let md = `### Nor AI TokenCraft Cost & Multi-Model Analysis Report (2026)\n\n`;
+  md += `Generated with ${TOOL.name} by ${COMPANY.short}: https://${TOOL.host}\n\n`;
   md += `* **Prompt Input Tokens:** ${formatNumber(tokenCount)}\n`;
   md += `* **Estimated Output Tokens (${outputMultiplier}x):** ${formatNumber(estimatedOutputTokens)}\n`;
   md += `* **Batch Executions:** ${formatNumber(batchVolume)}\n\n`;
@@ -103,6 +105,7 @@ export function buildCsvReport({
 }
 
 export interface JsonReport {
+  source: string;
   timestamp: string;
   promptTokens: number;
   estimatedOutputTokens: number;
@@ -131,6 +134,7 @@ export function buildJsonReport({
   models,
 }: ReportParams): JsonReport {
   return {
+    source: `${TOOL.name} by ${COMPANY.short}, https://${TOOL.host}`,
     timestamp: new Date().toISOString(),
     promptTokens: tokenCount,
     estimatedOutputTokens,

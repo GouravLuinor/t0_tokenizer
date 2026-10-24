@@ -154,7 +154,7 @@ function SignInButtonLabel({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md px-2.5 py-1.5 text-[13px] text-board-ink-2 transition-colors hover:bg-board-2 hover:text-board-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+      className="whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] text-board-ink-2 transition-colors hover:bg-board-2 hover:text-board-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
     >
       Sign in
     </button>

@@ -1,5 +1,7 @@
 # TokenCraft (t0_tokenizer) ⚡
 
+> 🔗 **Live:** [tokens.norai.tech](https://tokens.norai.tech) · One of the free developer tools from [Nor AI Technologies](https://norai.tech) · Built by [Gourav Kumar Singh](https://github.com/GouravLuinor)
+
 > **Tier-0 Developer-Grade BPE Tokenizer, Prompt Optimizer & Multi-Model Cost Engine**  
 > *100% Client-Side Local Compute • Zero Cloud Telemetry • Obsidian Dark Studio Aesthetic*
 
